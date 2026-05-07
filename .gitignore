@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+
+# Project data (scraper output)
+data/cache/
+data/images/
+data/pdf/
+output/
+*.log
+
+# Flask / database
+instance/
+*.sqlite
+*.db
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Optional: Python packaging
+build/
+dist/
+*.egg-info/
+
+# Optional: Coverage reports
+htmlcov/
+.coverage

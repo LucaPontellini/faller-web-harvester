@@ -1,0 +1,48 @@
+@startuml
+
+actor Utente
+actor "Amministratore (futuro)" as Admin
+
+rectangle "Faller Scraper" {
+
+    usecase "Avvia scraping" as UC1
+    usecase "Ricerca prodotto" as UC2
+    usecase "Filtra risultati" as UC3
+    usecase "Scarica immagini/documenti" as UC5
+    usecase "Genera output (Excel/ZIP)" as UC6
+
+    usecase "Estrazione dati prodotto" as UC4
+    usecase "Visualizza dashboard" as UC8
+
+    usecase "Accede pannello admin" as UC12
+    usecase "Visualizza statistiche scraping/utenti" as UC13
+
+    UC1 -[hidden]down-> UC2
+    UC2 -[hidden]down-> UC3
+    UC3 -[hidden]down-> UC5
+    UC5 -[hidden]down-> UC6
+}
+
+note top of UC1
+Autenticazione richiesta.
+Non esistono utenti anonimi.
+end note
+
+Utente --> UC1
+Utente --> UC2
+Utente --> UC3
+Utente --> UC5
+Utente --> UC6
+Utente --> UC8
+
+Admin --> UC12
+
+UC1 --> UC4 : <<include>>
+UC12 --> UC13 : <<include>>
+
+UC5 ..> UC4 : <<extend>>
+UC6 ..> UC8 : <<extend>>
+UC2 ..> UC8 : <<extend>>
+UC3 ..> UC8 : <<extend>>
+
+@enduml
