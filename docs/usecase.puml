@@ -1,48 +1,162 @@
 @startuml
 
-actor Utente
-actor "Amministratore (futuro)" as Admin
+' =============== FALLER WEB HARVESTER - USE CASE =============
 
-rectangle "Faller Scraper" {
+' Diagramma dei casi d’uso del sistema Faller Web Harvester.
+' Include attori, funzionalità utente, funzionalità admin, relazioni include/extend e note esplicative.
 
-    usecase "Avvia scraping" as UC1
-    usecase "Ricerca prodotto" as UC2
-    usecase "Filtra risultati" as UC3
-    usecase "Scarica immagini/documenti" as UC5
-    usecase "Genera output (Excel/ZIP)" as UC6
+left to right direction
 
-    usecase "Estrazione dati prodotto" as UC4
-    usecase "Visualizza dashboard" as UC8
-
-    usecase "Accede pannello admin" as UC12
-    usecase "Visualizza statistiche scraping/utenti" as UC13
-
-    UC1 -[hidden]down-> UC2
-    UC2 -[hidden]down-> UC3
-    UC3 -[hidden]down-> UC5
-    UC5 -[hidden]down-> UC6
+skinparam usecase {
+    BackgroundColor White
+    BorderColor DarkSlateGray
 }
 
-note top of UC1
-Autenticazione richiesta.
-Non esistono utenti anonimi.
+
+
+' =============== ATTORI PRINCIPALI ===========================
+actor Utente
+actor "Amministratore" as Admin
+
+' Spaziatura verticale tra gli attori
+Utente -[hidden]down- Admin
+
+
+
+' =============== SISTEMA =====================================
+rectangle "Faller Web Harvester" #LightGray {
+
+
+
+    ' =============== AZIONI UTENTE ==========================
+    package "Azioni Utente" #AliceBlue {
+
+        ' Casi d’uso principali dell’utente (ordine logico 1→6)
+        usecase "Avvia lo scraping" as UC1
+        usecase "Ricerca un prodotto" as UC2
+        usecase "Filtra i risultati" as UC3
+        usecase "Scarica immagini/documenti" as UC4
+        usecase "Genera l'output (Excel/ZIP)" as UC5
+        usecase "Elimina i dati estratti" as UC6
+
+        ' Casi d’uso interni (non numerati)
+        usecase "Visualizza la dashboard" as UC8
+        usecase "Estrazione dei dati del prodotto" as UC7
+    }
+
+
+
+    ' =============== AZIONI AMMINISTRATORE ==================
+    package "Azioni Amministratore" #GhostWhite {
+
+        usecase "Visualizza il pannello amministratore" as UC12
+
+        ' Casi d’uso principali dell’amministratore (ordine logico 1→6)
+        usecase "Visualizza le statistiche" as UC13
+        usecase "Scansiona i file (Immagini/PDF)" as UC14
+        usecase "Controlla i duplicati" as UC15
+        usecase "Elimina gli asset fisici" as UC16
+        usecase "Esporta l'Excel (Tutti i dati)" as UC17
+        usecase "Sincronizza il database" as UC18
+    }
+}
+
+
+
+' =============== NOTE UTENTE ================================
+note right of Utente
+  **Utente**
+  L’utente deve autenticarsi per poter avviare lo scraping.
 end note
 
+
+
+' =============== NOTE AMMINISTRATORE ========================
+note right of UC12
+  **Amministratore**
+  Accesso al pannello riservato per gestione e manutenzione.
+end note
+
+note right of UC12
+  **Visualizza statistiche**
+  Mostra numero di prodotti, immagini e PDF presenti.
+  
+  **Asset** = foto + PDF ed altre caratteristiche prodotto salvati nel sistema.
+end note
+
+note right of UC12
+  **Esporta Excel Globale**
+  Genera un file Excel contenente l’intero catalogo.
+end note
+
+note right of UC12
+  **Elimina asset fisici**
+  Cancella definitivamente immagini, PDF e tutti i prodotti dal database.
+end note
+
+note right of UC12
+  **Sincronizza database**
+  Confronta il database con i file realmente presenti.
+end note
+
+
+
+' =============== RELAZIONI UTENTE ===========================
 Utente --> UC1
 Utente --> UC2
 Utente --> UC3
+Utente --> UC4
 Utente --> UC5
 Utente --> UC6
-Utente --> UC8
 
-Admin --> UC12
+' Include: lo scraping richiede l’estrazione dei dati
+UC1 --> UC7 : <<include>>
 
-UC1 --> UC4 : <<include>>
-UC12 --> UC13 : <<include>>
+' Extend: il download può richiedere l’estrazione
+UC4 ..> UC7 : <<extend>>
 
-UC5 ..> UC4 : <<extend>>
-UC6 ..> UC8 : <<extend>>
+' Extend verso la dashboard (ricerca, filtri, download, output, eliminazione)
 UC2 ..> UC8 : <<extend>>
 UC3 ..> UC8 : <<extend>>
+UC4 ..> UC8 : <<extend>>
+UC5 ..> UC8 : <<extend>>
+UC6 ..> UC8 : <<extend>>
+
+
+
+' =============== RELAZIONE ESTRAZIONE → DASHBOARD ===========
+
+' Nota: la relazione UML corretta sarebbe:
+'   Estrazione dati prodotto <<extend>> Visualizza dashboard
+'
+' Tuttavia, PlantUML riorganizza il layout se si disegna la freccia, compromettendo la leggibilità del diagramma.
+' Per questo motivo la relazione è documentata tramite nota, pur rimanendo valida nel modello concettuale.
+
+note as EXTNOTE
+  Estrazione dati prodotto <<extend>> Visualizza dashboard
+end note
+
+' Posizionamento controllato della nota (linee invisibili)
+UC7 -[hidden]-> EXTNOTE
+EXTNOTE -[hidden]-> UC8
+
+
+
+' =============== RELAZIONI AMMINISTRATORE ===================
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+Admin --> UC16
+Admin --> UC17
+Admin --> UC18
+
+' Tutte le funzioni amministrative estendono il pannello admin
+UC13 ..> UC12 : <<extend>>
+UC14 ..> UC12 : <<extend>>
+UC15 ..> UC12 : <<extend>>
+UC16 ..> UC12 : <<extend>>
+UC17 ..> UC12 : <<extend>>
+UC18 ..> UC12 : <<extend>>
 
 @enduml

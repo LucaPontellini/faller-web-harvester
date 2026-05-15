@@ -14,13 +14,6 @@ env/
 .idea/
 *.swp
 
-# Project data (scraper output)
-data/cache/
-data/images/
-data/pdf/
-output/
-*.log
-
 # Flask / database
 instance/
 *.sqlite
@@ -40,5 +33,19 @@ dist/
 *.egg-info/
 
 # Optional: Coverage reports
+.pytest_cache/
 htmlcov/
 .coverage
+
+# Output from web scraping
+faller_catalogo/
+
+
+
+# Quando si deve condividere il progetto bisogna togleire queste righe da questo file
+# Evita di condividere il codice del progetto
+webapp/
+# Evita di condividere il documento
+docs/Project Structure (PS).md
+# Evita di condividere run.py
+run.py

@@ -1,0 +1,11 @@
+Flask
+Flask-login
+Werkzeug
+requests
+beautifulsoup4
+pandas
+openpyxl
+Pillow
+colorama
+lxml
+pytest

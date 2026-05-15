@@ -24,191 +24,297 @@ Il progetto è nato poco prima delle vacanze di Pasqua 2026 per risolvere un'ine
 | Sito web della FALLER | Fonte dei dati                | Fornire contenuti aggiornati da cui estrarre informazioni |
 | Studente              | Sviluppatore                  | Realizzare il progetto rispettando i requisiti, gestirne il codice e la manutenzione per futuri miglioramenti |
 | Docente               | Valutatore                    | Verificare correttezza tecnica, completezza e qualità della progettazione |
-| Utente Finale         | Utilizzatore del sistema      | Utilizzare l’applicazione per consultare, estrarre e organizzare automaticamente i dati del catalogo Faller (prodotti, immagini e documenti) |
+| Utente Finale         | Utilizzatore del sistema      | Utilizzare l’applicazione per consultare, estrarre, organizzare ed eliminare automaticamente i dati del catalogo Faller (prodotti, immagini e documenti) |
 
 ### 3.1 Attori principali
 
-- `Utente` → utilizza il sistema per avviare il web scraping del catalogo Faller, consultare i dati estratti e generare output come Excel, PDF e archivi ZIP
-- `Sistema Faller` → sito web esterno da cui vengono estratti automaticamente dati, immagini e documentazione del catalogo
+Il sistema prevede due tipologie di utenti autenticati e un'entità esterna con cui il software interagisce:
 
-### 3.2 Attori opzionali (solo in futuro con Flask)
+- `Utente (Operatore)`: È l'attore principale che utilizza l'interfaccia web per gestire il ciclo di vita dei dati. Ha i permessi per:
 
-- `Utente autenticato` → utente che accede tramite interfaccia web Flask per avviare e gestire il processo di scraping in modo guidato
-- `Amministratore del sistema` → consulta la propria dashboard per vedere l'andamento dello scraper ed altri dettagli tecnici
+  * Avviare lo scraping (singolo o per intervallo di codici).
+  * Ricercare, filtrare ed eliminare i prodotti estratti direttamente dalla tabella dei risultati.
+  * Generare i file di output (Excel e archivi ZIP).
+
+- `Amministratore (Admin)`: Figura tecnica che opera tramite un Control Panel avanzato. I suoi compiti reali includono:
+
+  * Monitoraggio Real-Time: Supervisione dello stato dell'Harvester tramite una console log interattiva e barre di avanzamento dinamiche.
+  * Sincronizzazione e Integrità: Esecuzione di controlli profondi sul database, come la verifica dei codici duplicati.
+  * Gestione Asset Massiva: Potere di eliminazione selettiva a livello di server (es. eliminazione totale dei PDF o delle immagini archiviate) per liberare spazio su disco.
+  * Reporting Globale: Generazione di esportazioni Excel massive che comprendono l'intero catalogo censito, non limitate alla singola sessione.
+  * Diagnostica: Capacità di resettare lo stato dei processi o svuotare la console di log per avviare nuove analisi tecniche.
+
+- `Sistema Faller` (Attore Passivo): 
+
+  * Rappresenta la fonte dati esterna (sito web faller.de). Il sistema interagisce con esso tramite richieste HTTP per l'estrazione automatica di informazioni, immagini e manuali tecnici.
 
 ## 4. Requisiti funzionali
 
 ### 4.1 Estrazione e Parsing
 
-- Il sistema deve permettere la ricerca automatica dei prodotti tramite URL diretti o liste di codici.
-- Il sistema deve gestire la ricerca del prodotto tramite query sul sito Faller e recuperare il link diretto alla pagina prodotto.
-- Il sistema deve estrarre i principali dati tecnici dei prodotti, tra cui: codice, nome, scala, disponibilità, dimensioni, epoca, EAN e descrizione.
-- Il sistema deve analizzare il contenuto HTML della pagina prodotto tramite parsing (BeautifulSoup) e selettori CSS.
-- Il sistema deve supportare la gestione di dati strutturati e non strutturati presenti nella sezione “At a glance”.
+- Il sistema deve permettere la ricerca automatica dei prodotti tramite l'inserimento di URL diretti o liste di codici articolo.
+- Il sistema deve gestire la ricerca dei prodotti tramite query automatizzate sul sito Faller per recuperare il link diretto alla pagina di dettaglio.
+- Il sistema deve analizzare il contenuto HTML della pagina prodotto utilizzando la libreria BeautifulSoup e selettori CSS dinamici.
+- Il sistema deve estrarre e mappare i dati tecnici presenti nella sezione "At a glance", garantendo il supporto sia per dati strutturati (tabelle) che non strutturati (liste).
+- Il sistema deve eseguire la sanificazione automatica delle stringhe, rimuovendo caratteri speciali, icone grafiche (es. checkmark) e spazi superflui per garantire la compatibilità con i formati di export.
+- Il sistema deve gestire l'assenza di dati assegnando il valore convenzionale "N/A" ai campi non valorizzati sul sito sorgente.
+- Il sistema deve supportare l'estrazione multilingua, essendo predisposto per operare sulle diverse varianti del sito (DE, EN, FR, NL).
+- Il sistema deve eseguire la sanificazione dei dati testuali per garantire una corretta esportazione in Excel, rimuovendo caratteri speciali, virgolette, simboli grafici e spazi inutili.
+- Il sistema deve gestire la presenza di dati mancanti assegnando automaticamente il valore convenzionale "N/A".
+- Il sistema deve normalizzare i campi estratti per garantire coerenza strutturale tra prodotti differenti, indipendentemente dalla scala o dall'epoca ferroviaria.
 
 I dati estratti vengono organizzati nei seguenti campi principali:
 
 ### Campi estratti dal sistema
 
-| Campo                            | Descrizione                                      | Tipo di dato |
-|----------------------------------|--------------------------------------------------|--------------|
-| `code`                           | Codice prodotto Faller                           | string       |
-| `exists`                         | Indica se il prodotto esiste/è disponibile       | boolean      |
-| `name`                           | Nome del prodotto                                | string       |
-| `scale`                          | Scala del modello (es. H0, N, Z)                 | string       |
-| `availability`                   | Stato di disponibilità                           | string       |
-| `dimensions`                     | Dimensioni del modello                           | string       |
-| `epoch`                          | Epoca ferroviaria                                | string       |
-| `kit_contains`                   | Contenuto del kit                                | string       |
-| `lighting`                       | Informazioni sull’illuminazione                  | string       |
-| `category`                       | Categoria del prodotto                           | string       |
-| `ean`                            | Codice EAN                                       | string       |
-| `description`                    | Descrizione testuale                             | string       |
-| `product_link`                   | URL della pagina prodotto                        | string (URL) |
-| `image_main`                     | Immagine principale                              | string (URL) |
-| `photo_1` … `photo_10`           | Foto aggiuntive                                  | string (URL) |
-| `layout_pdf_1` … `layout_pdf_10` | Layout PDF associati                             | string (URL) |
-| `manual_pdf`                     | Manuale PDF                                      | string (URL) |
-| `safety_pdf`                     | Scheda di sicurezza PDF                          | string (URL) |
+| Campo                     | Descrizione                                               | Tipo di dato |   |   |
+|---------------------------|-----------------------------------------------------------|--------------|---|---|
+| `code`                    | Codice univoco dell'articolo Faller.                      | string       |   |   |
+| `exists`                  | Indica se il prodotto esiste/è disponibile.               | boolean      |   |   |
+| `name`                    | Nome del prodotto                                         | string       |   |   |
+| `scale_image`             | Scala del modello (G, H0, N, Z).                          | string       |   |   |
+| `availability`            | Stato della disponibilità a magazzino.                    | string       |   |   |
+| `price`                   | Prezzo di listino.                                        | string       |   |   |
+| `category`                | Categoria merceologica del prodotto.                      | string       |   |   |
+| `ean`                     | Codice a barre internazionale.                            | string       |   |   |
+| `dimensions`              | Dimensioni fisiche del modello (in millimetri).           | string       |   |   |
+| `epoch`                   | Epoca ferroviaria di riferimento (I, II, ... VII).        | string       |   |   |
+| `kit_contains`            | Dettaglio dei componenti inclusi nel kit.                 | string       |   |   |
+| `lighting_or_electronics` | Informazioni tecniche su luci o elettronica.              | string       |   |   |
+| `difficulty`              | Grado di complessità dichiarato.                          | string       |   |   |
+| `delivery_date`           | Data di consegna prevista (se indicata).                  | string       |   |   |
+| `description`             | Testo descrittivo completo del prodotto.                  | string       |   |   |
+| `image_main`              | Immagine principale.                                      | string (URL) |   |   |
+| `photo_1 … photo_10`      | Foto aggiuntive                                           | string (URL) |   |   |
+| `layout_1 … layout_10`    | Layout in formato PDF                                     | string (URL) |   |   |
+| `manual_pdf`              | Manuale d'istruzioni in formato PDF.                      | string (URL) |   |   |
+| `safety_pdf`              | Scheda di sicurezza in formato PDF.                       | string (URL) |   |   |
+| `product_link`            | URL della pagina prodotto sorgente.                       | string (URL) |   |   |
 
-- Il sistema deve eseguire la sanificazione dei dati testuali per garantire una corretta esportazione in Excel (rimozione caratteri speciali, virgolette, simboli e spazi inutili).
-- Il sistema deve gestire la presenza di dati mancanti assegnando il valore "N/A".
-- Il sistema deve normalizzare i campi estratti per garantire coerenza tra prodotti differenti.
-
-### Nota tecnica:
-
-Il parsing dei dati è stato progettato per essere resiliente ai cambiamenti del sito web, grazie all’uso di selettori CSS e controlli di fallback sui dati mancanti.
+> Nota tecnica: 
+> Il parsing dei dati è stato progettato per essere resiliente ai cambiamenti del sito web, grazie all’uso di selettori CSS e controlli di fallback sui dati mancanti o opzionali.
 
 ### 4.2 Multimedia e PDF
-- Il sistema deve scaricare automaticamente le immagini associate ai prodotti, fino a un massimo di 10 per elemento.
-- Il sistema deve evitare duplicati nelle immagini tramite controllo di hash MD5.
-- Il sistema deve scaricare documentazione tecnica come manuali e schede di sicurezza.
-- Il sistema deve convertire automaticamente file immagine non strutturati (es. JPG singoli) in formato PDF.
 
-### 4.3 Persistenza e Caching
-- Il sistema deve salvare temporaneamente i dati in cache JSON per evitare richieste ripetute al server.
-- Il sistema deve implementare un meccanismo di retry automatico in caso di errori di rete o blocchi temporanei.
+- Il sistema deve scaricare automaticamente le immagini associate ai prodotti, fino a un massimo di 10 elementi per ogni articolo.
+- Il sistema deve evitare il download di duplicati tramite un controllo di integrità basato su hash MD5.
+- Il sistema deve scaricare la documentazione tecnica originale, inclusi i manuali d'istruzione e le schede di sicurezza in formato PDF.
+- Il sistema deve convertire automaticamente i file immagine non strutturati (come scansioni JPG singole) in un unico formato PDF per facilitarne la consultazione.
+
+### 4.3 Persistenza e Gestione Richieste
+
+- Il sistema deve implementare un tempo di attesa variabile (delay) tra le richieste consecutive al server per prevenire il blocco dell'indirizzo IP e mitigare il rischio di segnalazioni per attività di tipo DDoS.
+- Il sistema deve salvare i dati estratti nel database relazionale SQLite, garantendo la persistenza locale ed evitando richieste ripetute per prodotti già presenti in archivio.
+- Il sistema deve implementare un meccanismo di retry automatico in caso di errori di rete temporanei o blocchi durante le fasi di scaricamento.
 
 ### 4.4 Output e Archiviazione
-- Il sistema deve generare un file Excel dinamico contenente tutti i dati estratti.
-- Il file Excel deve includere anteprime delle immagini, link cliccabili e indicatori per i prodotti non disponibili.
-- Il sistema deve creare archivi ZIP contenenti dati, immagini e documenti con timestamp per la conservazione e il trasporto.
+
+- Il sistema deve generare un file Excel dinamico leggendo i dati dal database, includendo anteprime delle immagini, link ipertestuali e indicatori visivi per i prodotti non più disponibili.
+- Il sistema deve creare archivi ZIP compressi contenenti il database e tutti gli asset scaricati (immagini e documenti), rinominando il pacchetto con un timestamp per consentirne la conservazione storica.
+- Il sistema deve permettere all'utente amministratore di gestire lo storage fisico, consentendo l'eliminazione dei file multimediali direttamente dall'interfaccia di controllo.
 
 ## 4.5. User Stories
 
-- Come utente voglio avviare il web scraping del catalogo Faller per ottenere automaticamente dati aggiornati dei prodotti
-- Come utente voglio visualizzare i dati estratti per consultarli facilmente
-- Come utente voglio filtrare i prodotti in base a criteri specifici (scala, epoca, categoria) per trovare rapidamente le informazioni desiderate
-- Come utente voglio esportare i dati in formato Excel per utilizzarli offline
-- Come utente voglio scaricare immagini e documenti dei prodotti per utilizzarli nel progetto del plastico ferroviario
-- Come utente voglio creare un archivio ZIP per salvare e trasportare i dati
-- Come utente voglio consultare i dati tramite un’interfaccia web basata su Flask (futuro)
+- Come **utente**, voglio avviare il web scraping del catalogo Faller in modo da ottenere automaticamente dati sempre aggiornati senza doverli inserire manualmente.
+- Come **utente**, voglio consultare i dati estratti tramite un’interfaccia web basata su Flask in modo da gestire l’intero catalogo in modo visivo, rapido e centralizzato.
+- Come **utente**, voglio filtrare i prodotti in base a criteri specifici (scala, epoca, categoria) in modo da individuare istantaneamente le informazioni e i modelli compatibili con il mio plastico ferroviario.
+- Come **utente**, voglio esportare i dati del database in formato Excel in modo da poterli consultare offline, elaborarli esternamente o utilizzarli per un inventario cartaceo.
+- Come **utente**, voglio scaricare immagini e documenti tecnici (PDF) dei prodotti in modo da avere sempre a disposizione i manuali di montaggio e le reference fotografiche sul mio PC.
+- Como **utente**, voglio creare un archivio ZIP che raggruppi dati e asset multimediali in modo da poter salvare, trasportare o condividere l'intero progetto in un unico file compatto.
+
+---
+
+- Come **amministratore**, voglio monitorare lo stato dello scraping in tempo reale tramite una console log dedicata in modo da verificare il corretto avanzamento del processo o individuare eventuali errori di rete.
+- Come **amministratore**, voglio poter eliminare selettivamente i dati o i file fisici (immagini e PDF) dal server in modo da gestire lo spazio di archiviazione e mantenere pulito il sistema.
 
 ## 5. Requisiti Non Funzionali
 
-- Il sistema deve essere eseguibile in ambiente Python locale senza dipendenze complesse
-- Il sistema deve gestire errori di rete senza interrompere l’esecuzione (retry automatici)
-- Il sistema deve garantire la coerenza dei dati salvati in cache JSON
-- Il sistema deve limitare le richieste al sito esterno per evitare sovraccarichi (rate limiting)
-- Il sistema deve essere modulare e suddiviso in componenti riutilizzabili
-- Il sistema deve supportare future estensioni verso un’interfaccia web basata su Flask e database SQLite
-- Il sistema deve mantenere un comportamento etico nelle richieste (delay tra le chiamate HTTP)
-- Il sistema deve garantire resilienza tramite gestione degli errori e tentativi di riconnessione automatici
-- Il sistema deve garantire la sicurezza delle credenziali utente (in caso di estensione web) tramite hashing delle password
-- Il sistema deve offrire una buona usabilità tramite un’interfaccia web responsiva, accessibile anche da dispositivi mobili
-- Il sistema deve adottare un’architettura modulare (es. pattern Repository) per separare la logica di accesso ai dati dallo scraping
+- **Portabilità**: 
+  * Il sistema deve essere eseguibile in ambiente Python locale senza dipendenze complesse, garantendo la portabilità dell'intera struttura (database e asset) tra diversi host.
+
+- **Affidabilità**: 
+  * Il sistema deve garantire la resilienza tramite la gestione delle eccezioni e meccanismi di retry automatici per gestire instabilità della rete senza crash del programma.
+
+- **Integrità**: 
+  * Il sistema deve assicurare la coerenza dei dati salvati nel database SQLite, impedendo la corruzione delle informazioni in caso di arresto improvviso.
+
+- **Etica e Rate Limiting**: 
+  * Il sistema deve mantenere un comportamento rispettoso verso i server esterni tramite l'implementazione di ritardi variabili (delay) tra le chiamate HTTP per evitare sovraccarichi.
+
+- **Manutenibilità**: 
+  * Il sistema deve adottare un'architettura modulare basata sul pattern Repository e sulla separazione dei compiti (SOC), facilitando futuri aggiornamenti o estensioni del codice.
+
+- **Efficienza**: 
+  * Il sistema deve ottimizzare l'uso delle risorse durante lo scaricamento di grandi quantità di asset multimediali, gestendo i timeout in modo da non bloccare i processi attivi.
+
+- **Sicurezza**: 
+  * Il sistema deve garantire la protezione delle credenziali di accesso tramite tecniche di hashing delle password, evitando la memorizzazione di dati sensibili in chiaro.
+
+- **Usabilità**: 
+  * L'interfaccia web deve essere responsiva, garantendo la corretta visualizzazione e navigazione dei dati anche su dispositivi mobili e tablet (approccio mobile-friendly).
+
+- **Standardizzazione**: 
+  * Il sistema deve garantire la normalizzazione e la sanificazione di tutti i dati testuali prima della persistenza, per assicurare uno standard qualitativo uniforme in fase di export.
 
 ## 6. Casi d'uso
 
 ### 6.1 Casi d’uso principali
 
-1. `Avvio scraping prodotti`
-2. `Ricerca prodotto`
-3. `Visualizzazione pagina prodotto`
-4. `Estrazione dati prodotto`
-5. `Download immagini e documenti`
-6. `Generazione file Excel`
-7. `Creazione archivio ZIP`
-8. `Visualizzazione dati estratti`
+1. `Avvia lo scraping`
+2. `Ricerca un prodotto`
+3. `Filtra i risultati`
+4. `Scarica immagini/documenti`
+5. `Genera l'output (Excel/ZIP)`
+6. `Elimina i dati estratti`
+7. `Estrazione dei dati del prodotto`
+8. `Visualizza la dashboard`
+9. `Visualizza il pannello amministratore`
+10. `Visualizza le statistiche`
+11. `Scansiona i file (Immagini/PDF)`
+12. `Controlla i duplicati`
+13. `Elimina gli asset fisici`
+14. `Esporta l'Excel (Tutti i dati)`
+15. `Sincronizza il database`
 
 ### 6.2 Descrizione semplificata dei casi d’uso
 
-- **Avvio scraping prodotti**: l’utente avvia il sistema per iniziare il processo di raccolta dati dal sito Faller.
-- **Ricerca prodotto**: il sistema permette di cercare un prodotto tramite codice o parola chiave.
-- **Visualizzazione pagina prodotto**: il sistema accede alla pagina del prodotto sul sito Faller.
-- **Estrazione dati prodotto**: il sistema analizza la pagina e recupera le informazioni principali del prodotto.
-- **Download immagini e documenti**: il sistema scarica automaticamente immagini e file PDF associati al prodotto.
-- **Generazione file Excel**: il sistema organizza i dati estratti in un file Excel.
-- **Creazione archivio ZIP**: il sistema comprime dati, immagini e documenti in un unico archivio.
-- **Visualizzazione dati estratti**: l’utente può consultare i dati raccolti in modo ordinato.
+- **Avvia lo scraping**: l’utente autenticato avvia la procedura automatizzata per la raccolta dei dati dal catalogo Faller.  
+- **Ricerca un prodotto**: l’utente interroga la dashboard per individuare un articolo specifico tramite il codice o parole chiave.  
+- **Filtra i risultati**: l’utente restringe la visualizzazione dei prodotti in base a criteri tecnici come scala, epoca o categoria.  
+- **Scarica immagini/documenti**: l’utente attiva il salvataggio locale dei file multimediali e della documentazione tecnica associata. 
+- **Genera l'output (Excel/ZIP)**: il sistema esporta i dati raccolti in un foglio di calcolo o crea un archivio compresso per il trasporto. 
+- **Elimina i dati estratti**: l’utente rimuove i record selezionati dal proprio database locale. 
+- **Estrazione dei dati del prodotto**: il sistema analizza l'HTML della pagina sorgente e mappa le informazioni tecniche del modello. 
+- **Visualizza la dashboard**: l’utente accede all'interfaccia centrale per consultare e gestire l'intero catalogo dei dati estratti. 
+- **Visualizza il pannello amministratore**: accesso all'area riservata per le operazioni di manutenzione e monitoraggio del sistema. 
+- **Visualizza le statistiche**: consultazione del riepilogo numerico degli asset (prodotti, foto e PDF) salvati nel sistema. 
+- **Scansiona i file (Immagini/PDF)**: procedura di controllo dell'integrità dei file multimediali presenti nello storage. 
+- **Controlla i duplicati**: verifica della presenza di file ridondanti tramite il confronto dell'hash MD5. 
+- **Elimina gli asset fisici**: rimozione definitiva dei file e dei record dal server per la gestione dello spazio di archiviazione. 
+- **Esporta l'Excel (Tutti i dati)**: generazione di un report globale contenente l'intero catalogo memorizzato nel database. 
+- **Sincronizza il database**: allineamento forzato tra i record del database e i file realmente presenti nel filesystem. 
 
 ### 6.3 Diagramma dei casi d’uso
 
-![Use Case Diagram](usecase.png)
+![Use Case Diagram](./images/usecase.png)
 
 Il diagramma è generato a partire dal file PlantUML: [`usecase.puml`](usecase.puml)
 
-### 6.4 Relazioni tra casi d'uso: include ed extend
+### 6.4 Relazioni tra casi d’uso: include ed extend
 
-I casi d’uso sono collegati tra loro tramite relazioni di tipo include ed extend.
+I casi d’uso del sistema **Faller Web Harvester** sono collegati tra loro tramite relazioni semantiche che definiscono le dipendenze funzionali e il flusso operativo.
 
-Include:
-- "Estrazione dati prodotto" include "Visualizzazione pagina prodotto"
-- "Download immagini e documenti" include "Estrazione dati prodotto"
-- "Generazione file Excel" include "Estrazione dati prodotto"
+#### 1. Relazioni di Associazione (Attori → Casi d’uso)
 
-Extend:
-- "Creazione archivio ZIP" estende "Generazione file Excel" (funzionalità opzionale)
-- "Visualizzazione dati estratti" estende "Generazione file Excel" (consultazione opzionale)
+Queste relazioni indicano quali attori possono avviare le diverse funzionalità del sistema:
+
+- **Utente**: Associato a tutte le operazioni core: ricerca, filtraggio, avvio scraping, download e gestione dei dati estratti (**UC1–UC8**).
+- **Amministratore**: Associato al Pannello Amministratore e a tutte le funzioni di manutenzione tecnica e statistica del sistema (**UC12–UC18**).
+
+#### 2. Relazioni di Include
+
+La relazione `«include»` rappresenta una funzionalità **obbligatoria** e sempre eseguita come parte del caso d’uso base.
+
+- **“Avvia scraping” include “Estrazione dati prodotto”**: L’avvio dello scraping (**UC1**) richiede necessariamente l’esecuzione del processo di estrazione dati (**UC7**). Non è possibile effettuare lo scraping senza l’estrazione.
+
+#### 3. Relazioni di Extend
+
+La relazione `«extend»` rappresenta funzionalità **opzionali**, condizionali o di arricchimento del caso d’uso principale.
+
+**Ambito Utente:**
+
+- **“Scarica immagini/documenti” estende “Estrazione dati prodotto”**: Il download fisico dei file (**UC4**) è un comportamento opzionale che può verificarsi dopo l’estrazione dei dati (**UC7**).
+
+- **Interazioni con la Dashboard**: I seguenti casi d’uso estendono il caso d’uso base **“Visualizza dashboard” (UC8)**:
+  - Ricerca (**UC2**)
+  - Filtro (**UC3**)
+  - Download (**UC4**)
+  - Generazione dell'output (**UC5**)
+  - Eliminazione (**UC6**)
+
+La Dashboard funge da interfaccia centrale che viene arricchita dalle azioni specifiche dell’utente.
+
+**Ambito Amministratore:**
+
+- **Gestione del Pannello Amministratore**: Tutte le azioni amministrative estendono il caso d’uso base **“Visualizza pannello amministratore” (UC12)**:
+  - Visualizza le statistiche
+  - Scansiona i file
+  - Controlla i duplicati
+  - Elimina gli asset
+  - Esporta l'Excel globale
+  - Sincronizza il database
+
+#### Nota Tecnica
+
+Nel modello logico del sistema, il caso d’uso **“Estrazione dati prodotto” (UC7)** porta naturalmente l’utente alla **“Visualizza dashboard” (UC8)** per consultare i risultati dello scraping. La relazione UML corretta sarebbe:
+
+> **Estrazione dati prodotto** `«extend»` **Visualizza dashboard**
+
+Questa relazione non è stata rappresentata graficamente nel diagramma PlantUML per motivi di leggibilità (l’aggiunta di una freccia tra package diversi generava un layout confuso). La relazione rimane comunque valida a livello concettuale e viene documentata in questa sezione.
 
 ## 7. Glossario dei termini
-- **Utente**: utilizzatore del sistema che avvia il processo di web scraping, consulta i dati estratti e gestisce l’esportazione (Excel, PDF e archivi ZIP)
-- **Web Scraping**: tecnica di estrazione automatica di dati da pagine web, utilizzata per recuperare informazioni dal sito Faller
-- **Sito web della Faller**: sito web esterno da cui vengono estratti dati, immagini e documentazione relativi ai prodotti del catalogo
-- **Prodotto**: elemento del catalogo Faller contenente informazioni come codice, nome, scala, epoca, dimensioni, immagini e documenti associati
-- **Parser**: componente del sistema che analizza il contenuto HTML delle pagine e ne estrae dati strutturati
-- **Downloader**: modulo responsabile del download di immagini e documenti associati ai prodotti
-- **Cache**: sistema di memorizzazione locale (in formato JSON) utilizzato per evitare richieste duplicate e velocizzare il processo di scraping
-- **Excel dinamico**: file di output generato automaticamente contenente i dati dei prodotti, con link e anteprime
-- **Backup ZIP**: archivio compresso contenente dati, immagini e documenti esportati dal sistema
-- **Hash MD5**: firma digitale univoca di un file utilizzata per identificare eventuali duplicati
-- **EAN**: codice a barre internazionale per l'identificazione univoca del prodotto
-- **Scala (Track Gauge)**: rapporto di riduzione del modello ferroviario (es. H0, N, Z)
-- **Epoca**: periodo storico ferroviario di riferimento del modello
-- **Rate limiting**: tecnica utilizzata per limitare il numero di richieste inviate a un server
-- **Flask**: framework Python utilizzato per lo sviluppo di applicazioni web
-- **SQLite**: database relazionale leggero basato su file locale
-- **Database**: sistema di archiviazione strutturata dei dati che permette interrogazioni e gestione efficiente delle informazioni
+
+- **AJAX**: tecnica di sviluppo web che permette a una pagina di aggiornare i dati in modo asincrono, scambiando informazioni con il server "dietro le quinte" senza dover ricaricare l'intera pagina.
+- **Amministratore**: figura responsabile della gestione tecnica, del controllo degli accessi e della manutenzione dell'integrità di un sistema informatico.
+- **Application Factory**: pattern di progettazione utilizzato in Flask per creare l'istanza dell'applicazione all'interno di una funzione; facilita la configurazione, i test e l'estendibilità del software.
+- **Asset**: termine tecnico che indica le risorse digitali statiche (immagini, documenti PDF, icone) collegate ai record informativi e salvate nel filesystem.
+- **Availability**: indicatore dello stato di giacenza di un prodotto, che segnala se l'articolo è reperibile, in arrivo o fuori produzione nel catalogo del fornitore.
+- **Backend**: parte di un'applicazione web che risiede sul server, responsabile della logica di business, dell'elaborazione dei dati e dell'interazione con il database.
+- **BeautifulSoup**: libreria Python utilizzata per analizzare documenti HTML e XML, permettendo di navigare e cercare dati specifici all'interno del codice di una pagina web.
+- **Blueprint**: componente di Flask utilizzato per organizzare l'applicazione in moduli distinti, separando logicamente aree diverse come l'interfaccia utente e il pannello di controllo.
+- **Cache**: area di memoria o sistema di archiviazione temporanea utilizzato per velocizzare il recupero di dati già consultati, evitando ripetute operazioni di scraping o calcolo.
+- **Code (Codice Articolo)**: identificativo alfanumerico univoco assegnato da un produttore a un pezzo specifico per distinguerlo all'interno del proprio catalogo commerciale.
+- **CSS**: linguaggio utilizzato per definire la formattazione e il layout visivo (colori, font, spaziature) delle pagine web scritte in HTML.
+- **CSV**: formato di file testuale utilizzato per memorizzare dati in forma tabellare, dove ogni riga rappresenta un record e i campi sono separati da virgole o punti e virgola.
+- **Database Relazionale**: sistema software progettato per memorizzare e gestire dati strutturati in tabelle collegate tra loro tramite chiavi comuni.
+- **Dimensions**: misure fisiche (lunghezza, larghezza, altezza) che definiscono l'ingombro spaziale di un oggetto o di un modello in scala.
+- **Downloader**: componente software specializzato nel prelevare file (immagini o PDF) da server remoti tramite protocolli HTTP/HTTPS per salvarli in una memoria locale.
+- **EAN**: standard internazionale per la codifica a barre dei prodotti, composto da 13 cifre che identificano univocamente un articolo a livello globale.
+- **Epoca**: classificazione storica utilizzata nel modellismo per identificare il periodo di appartenenza di un treno o edificio rispetto all'evoluzione ferroviaria reale.
+- **Flask**: framework di sviluppo web "micro" basato su Python, che fornisce le basi per creare applicazioni web flessibili e modulari.
+- **Frontend**: parte di un'applicazione web con cui l'utente interagisce direttamente tramite il browser (interfaccia visiva, pulsanti, menu).
+- **Hash MD5**: algoritmo che genera una stringa univoca basata sul contenuto binario di un file; funge da "impronta digitale" per verificare l'identità di un file ed evitare duplicati.
+- **HTML**: linguaggio di marcatura utilizzato per creare la struttura portante delle pagine web tramite l'uso di "tag" (titoli, paragrafi, tabelle).
+- **ID**: codice numerico assegnato automaticamente da un sistema a un record per garantirne l'unicità assoluta all'interno di un database.
+- **JavaScript**: linguaggio di programmazione lato client utilizzato per rendere le pagine web interattive e gestire comportamenti dinamici (come menu a comparsa o chiamate AJAX).
+- **Jinja2**: motore di templating utilizzato da Flask per generare dinamicamente pagine HTML, permettendo di inserire dati provenienti dal codice Python direttamente nel markup.
+- **JSON**: formato leggero per lo scambio di dati, facilmente leggibile sia dagli esseri umani che dalle macchine, basato su coppie chiave-valore.
+- **Kit di montaggio****: insieme di componenti separati che richiedono un assemblaggio manuale (spesso con colla e attrezzi specifici) per ottenere il modello finito.
+- **ORM**: tecnica che permette di interagire con il database utilizzando oggetti del linguaggio di programmazione (Python) invece di scrivere query SQL manuali.
+- **Parser**: programma che esamina una sequenza di dati grezzi (come il codice HTML) per isolare informazioni specifiche e trasformarle in dati strutturati e utilizzabili.
+- **Rate limiting**: tecnica di gestione del traffico che limita la frequenza con cui un sistema invia richieste a un server, prevenendo sovraccarichi o blocchi di sicurezza.
+- **Repository Pattern**: architettura software che isola la logica di accesso ai dati dal resto dell'applicazione, rendendo il codice più pulito, testabile e facile da mantenere.
+- **Route**: decoratore di Flask che associa un indirizzo URL specifico a una funzione Python, determinando cosa deve apparire nel browser quando si visita una pagina.
+- **Scala**: rapporto matematico che indica quanto un modello è rimpicciolito rispetto all'originale (es. 1:87 significa che il modello è 87 volte più piccolo della realtà).
+- **Selettori CSS**: pattern utilizzati per identificare e "puntare" elementi specifici all'interno di una pagina HTML, fungendo da coordinate per l'estrazione mirata dei dati durante lo scraping.
+- **SQLite**: motore di database relazionale leggero che memorizza l'intero archivio all'interno di un unico file locale, ideale per applicazioni che non richiedono un server database dedicato.
+- **Timestamp**: marcatura temporale che registra l'istante preciso (data e ora) in cui è avvenuto un evento o è stato aggiornato un dato nel sistema.
+- **Utente**: persona che interagisce con l'applicazione software tramite l'interfaccia frontend per usufruire delle sue funzionalità.
+- **Web Scraping**: processo automatizzato di estrazione di informazioni da siti web tramite software che leggono e interpretano il codice sorgente delle pagine online.
 
 ## 8. Pianificazione e milestone
 
 ### 8.1 Gantt
 
-![Gantt Diagram](gantt.png)
+![Gantt Diagram](./images/Gantt.JPG)
 
-Il diagramma di Gantt è generato a partire dal file Mermaid: [`gantt.mmd`](gantt.mmd)
+Il diagramma di Gantt è generato a partire dal file Mermaid: [`gantt.mmd`](./mermaid/gantt.mmd)
 
-### Nota realistica di progetto
-
-Il piano temporale rappresenta una stima teorica delle attività. In pratica lo sviluppo viene eseguito in modalità non continuativa (time-based), in base alla mia disponibilità. Questo comporta possibili variazioni nella durata delle singole fasi.
+> Nota realistica di progetto:
+> Il diagramma di Gantt sopra riportato illustra la sequenza logica e la stima temporale delle macro-attività di progetto. Tuttavia, lo sviluppo è avvenuto in modalità **time-based (non continuativa)**, adattando l'avanzamento dei lavori alla disponibilità effettiva. Di conseguenza, le durate indicate devono essere interpretate come un riferimento teorico per la gestione delle dipendenze tra le fasi.
 
 ## 9 Entità e relazioni (Schema ER)
 
-```mermaid
-erDiagram
+![erDiagram](./images/erDiagram.png)
 
-PLACEHOLDER {}
+L'erDiagram è generato a partire dal file Mermaid: [`erDiagram.mmd`](./mermaid/erDiagram.mmd)
 
-```
 
 ## 10. Diagramma UML delle classi
 
-```mermaid
-classDiagram
+![classDiagram](./images/classDiagram.png)
 
-class Placeholder
-
-```
+Il classDiagram è generato a partire dal file Mermaid: [`classDiagram.mmd`](./mermaid/classDiagram.mmd)
 
 ---
 

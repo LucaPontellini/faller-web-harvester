@@ -1,0 +1,64 @@
+erDiagram
+
+    %% TABELLA UTENTI
+    USER {
+        int id PK
+        string username UK
+        string password_hash
+        string role
+    }
+
+    %% TABELLA PRODOTTI
+    PRODUCT {
+        int id PK
+        string code UK
+        int exists
+        string scale_image
+        string name
+        string availability
+        string price
+        string kit_contains
+        string dimensions
+        string epoch
+        string lighting_or_electronics
+        string construction_instruction
+        string difficulty
+        string delivery_date
+        string category
+        string ean
+        string description
+        string image_main
+        
+        %% Galleria Fotografica
+        string photo_1
+        string photo_2
+        string photo_3
+        string photo_4
+        string photo_5
+        string photo_6
+        string photo_7
+        string photo_8
+        string photo_9
+        string photo_10
+        
+        %% Layout e Piante
+        string layout_1
+        string layout_2
+        string layout_3
+        string layout_4
+        string layout_5
+        string layout_6
+        string layout_7
+        string layout_8
+        string layout_9
+        string layout_10
+        
+        %% Documentazione e Metadati
+        string manual_pdf
+        string safety_pdf
+        string product_link
+        datetime last_updated
+    }
+
+    %% RELAZIONE
+    USER ||--o{ PRODUCT : gestisce

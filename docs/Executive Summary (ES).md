@@ -20,11 +20,10 @@ Tali sviluppi sono descritti nei [Requisiti Non Funzionali](./Software%20Require
 
 ## Riferimenti ai file del progetto
 
-- **Codice sorgente** → *(da creare)*  
-- **Script principale** → `faller_scraper.py` *(da creare)*  
-- **Output Excel e ZIP** → *(generati automaticamente)*
+- [**Script principale**](../run.py)
 - [**README del progetto**](../README.md)
 - [**Software Requirements Specification (SRS)**](./Software%20Requirements%20Specification%20(SRS).md)
+- [**Project Structure (PS)**](./Project%20Structure%20(PS).md)
 - [**Cross-Disciplinary Mapping (CDM)**](./Cross-Disciplinary%20Mapping%20(CDM).md)
 
 ---

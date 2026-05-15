@@ -1,20 +1,17 @@
 # Faller Web Harvester
 
-Sistema di web harvesting per il catalogo Faller, progettato per estrarre automaticamente dati tecnici, immagini e documentazione dal sito ufficiale [Gebr. Faller GmbH](https://www.faller.de/en/). L’architettura è modulare e predisposta per future integrazioni con un database SQLite, un’interfaccia web basata su Flask e l’estensione verso altri siti di modellismo ferroviario.
+Sistema di web harvesting per il catalogo Faller, progettato per estrarre automaticamente dati tecnici, immagini e documentazione dal sito ufficiale [Gebr. Faller GmbH](https://www.faller.de/en/). L'architettura è full-stack e modulare, basata su un'interfaccia web in Flask e un database SQLite gestito tramite Repository Pattern. Il sistema garantisce una netta separazione tra la logica di scraping, la persistenza dei dati e la presentazione utente.
 
 ---
 
 ## Funzionalità principali
 
-- Estrazione automatica dei dati dei prodotti dal sito Faller  
-- Download di immagini, manuali, schede di sicurezza e layout PDF  
-- Esportazione in Excel con anteprime delle immagini e link cliccabili  
-- Sistema di cache JSON per ridurre richieste ripetute  
-- Generazione di archivi ZIP per facilitare la conservazione e il trasporto dei dati  
-- Architettura modulare, pensata per:
-  - interfaccia web Flask  
-  - integrazione con database SQLite  
-  - supporto multi‑catalogo (futuro)
+- **Estrazione automatica dei dati**: Web scraping avanzato delle pagine prodotto del sito Faller per recuperare informazioni tecniche, codici EAN, scale, epoche, ecc. .
+- **Gestione Multi-media**: Download e organizzazione sistematica di immagini, manuali d'istruzione, schede di sicurezza e layout in formato PDF.
+- **Persistenza su Database**: Archiviazione strutturata dei dati tramite SQLite, implementata con il Repository Pattern per una gestione efficiente delle entità prodotto.
+- **Dashboard Web**: Interfaccia di controllo basata su Flask per la gestione dei processi di scraping, la ricerca filtrata dei prodotti e la visualizzazione della cache.
+- **Esportazione Professionale**: Generazione di file Excel dettagliati (con anteprime immagini e link) e creazione di archivi ZIP per la portabilità dei dati.
+- **Ottimizzazione e Caching**: Sistema di cache per ridurre il numero di richieste al server e gestione delle eccezioni basata su un file di configurazione (config.py) raffinato iterativamente.
 
 ---
 
@@ -25,8 +22,6 @@ La struttura completa del progetto è documentata nel file dedicato: [Project St
 ---
 
 ## Installazione
-
-> ⚠️ *Il progetto è attualmente in sviluppo. La struttura potrebbe evolvere.*
 
 ### 1. Creare un ambiente virtuale (consigliato)
 
@@ -43,76 +38,76 @@ python -m venv venv
 
 ### 3. Installare le dipendenze
 
+Il progetto richiede le librerie elencate in [requirements.txt](requirements.txt) (tra cui Flask, Pandas, BeautifulSoup4, ecc.).
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Eseguire lo scraper (quando il file principale sarà aggiunto)
+### 4. Avviare l'Applicazione
+
+Il punto di ingresso del sistema è [run.py](run.py), che inizializza l'applicazione Flask e il server locale.
 
 ```bash
-python faller_scraper.py
+python run.py
 ```
 
----
-
-## Utilizzo (stato attuale)
-
-> ⚠️ *Il modulo principale non è ancora stato implementato.  
-> Questa sezione descrive il flusso di utilizzo previsto e verrà aggiornata quando il codice sarà disponibile.*
-
-Il funzionamento atteso del sistema, una volta completato, seguirà queste fasi:
-
-1. **Fornire un input di prodotti**, che potrà essere:
-   - una lista di codici prodotto (es. `180600`, `130470`, `120290`)
-   - una lista di URL diretti alle pagine Faller
-   - un *range* di codici (es. `180000–181000`) per scraping massivo
-
-2. **Avviare il processo di scraping**, che includerà:
-   - ricerca del prodotto
-   - parsing della pagina
-   - estrazione dei dati tecnici
-   - download di immagini e documenti
-
-3. **Generazione automatica degli output**:
-   - **Excel** contenente tutti i dati estratti (testi, specifiche tecniche, immagini in anteprima e link cliccabili)
-   - **Archivio ZIP** (opzionale) contenente immagini, PDF e file generati
-   - **Cache JSON** per evitare richieste ripetute
-
-Una volta implementato il modulo principale, questa sezione verrà ampliata con:
-- esempi pratici  
-- screenshot  
-- comandi CLI  
-- file di input di esempio  
+Una volta avviato, apri il browser all'indirizzo http://127.0.0.1:5000 per accedere al progetto
 
 ---
 
-## Documentazione
+## Utilizzo 
 
-- [Executive Summary (ES)](./docs/Executive%20Summary%20(ES).md)
-- [Software Requirements Specification (SRS)](./docs/Software%20Requirements%20Specification%20(SRS).md)
-- [Project Structure (PS)](./docs/Project%20Structure%20(PS).md)
-- [Cross-Disciplinary Mapping (CDM)](./docs/Cross-Disciplinary%20Mapping%20(CDM).md)
-- Manuale utente (User Guide) *(da creare)*
-- Test Suite *(da creare)*
+L'interazione con il sistema avviene attraverso una **Dashboard Web** centralizzata che permette di gestire l'intero ciclo di vita dei dati del catalogo Faller.
+
+### 1. Flusso di Lavoro dell'Utente
+
+L'utente può operare seguendo queste fasi principali:
+
+* **Configurazione Input**: È possibile avviare lo scraping inserendo una lista di **codici prodotto** singoli o definendo un **range numerico** per l'estrazione massiva di intere serie di articoli.
+* **Harvesting & Cleaning**: Il sistema esegue il parsing del sito ufficiale, scarica le immagini e la documentazione tecnica, applicando la pulizia dei dati tramite le regole per gestire le incongruenze dell'HTML originale.
+* **Consultazione Avanzata**: Attraverso l'interfaccia, è possibile gestire i dati estratti utilizzando filtri specifici:
+* **Ricerca e filtraggio per**: Codice Prodotto, EAN, Categoria o Nome Prodotto.
+* **Generazione Output**: Esportazione dei dati in formato **Excel** (con anteprime immagini e link) e creazione di **archivi ZIP** pronti per l'uso offline.
+
+### 2. Funzionalità Amministratore (Admin)
+
+L'Amministratore ha accesso a strumenti di gestione per garantire l'integrità del catalogo, operando in modo simile all'utente ma con poteri di supervisione:
+
+* **Manutenzione Dati**: Capacità di modificare o eliminare i dati estratti per correggere eventuali errori persistenti nel database.
+* **Supervisione Sistema**: Monitoraggio dell'attività di harvesting e della coerenza tra il database SQLite e i file multimediali (immagini e PDF) salvati localmente.
 
 ---
 
-## Sviluppi futuri
+## Documentazione e Risorse
 
-Gli sviluppi futuri previsti per il progetto riguardano principalmente il miglioramento dell’esperienza d’uso e l’estensione delle funzionalità già presenti:
+Il progetto è accompagnato da una documentazione tecnica completa, pensata sia per l'analisi funzionale che per la mappatura multidisciplinare:
 
-- Interfaccia web basata su Flask per avviare e monitorare lo scraping
-- Integrazione con un database SQLite per la memorizzazione dei dati estratti
-- Miglioramento del logging e della gestione degli errori
-- Ottimizzazione del download di immagini e documenti
+* **[Executive Summary (ES)](./docs/Executive%20Summary%20(ES).md)**: Visione d'insieme, obiettivi del progetto e contesto (il plastico di famiglia).
+* **[Software Requirements Specification (SRS)](./docs/Software%20Requirements%20Specification%20(SRS).md)**: Analisi dettagliata dei requisiti funzionali, non funzionali e casi d'uso.
+* **[Project Structure (PS)](./docs/Project%20Structure%20(PS).md)**: Descrizione dell'architettura modulare, dei Blueprints e dei Repository.
+* **[Cross-Disciplinary Mapping (CDM)](./docs/Cross-Disciplinary%20Mapping%20(CDM).md)**: Collegamenti tra il progetto e le materie di indirizzo informatico (GPOI, Informatica, Sistemi e Reti, TPSIT e Lingua Inglese).
 
-Queste funzionalità saranno valutate e implementate in base all’evoluzione del progetto. 
+### Diagrammi e Progettazione
+
+Nella cartella `docs/` sono disponibili i seguenti artefatti grafici:
+
+* **[Diagramma dei Casi d'Uso (UML)](./docs/usecase.puml)**: Flussi Utente e Admin.
+* **[Schema Entità-Relazione (ER)](./docs/mermaid/erDiagram.mmd)**: Struttura del database SQLite.
+* **[Diagramma delle Classi](./docs/mermaid/classDiagram.mmd)**: Relazioni tra modelli e repository.
+* **[Gantt](./docs/mermaid/gantt.mmd)**: Cronoprogramma dello sviluppo.
+
+### Work in Progress
+
+* **Manuale Utente (User Guide)**: Guida illustrata alla navigazione della Dashboard.
+* **Test Suite**: Documentazione dei test unitari (Pytest) per la validazione dello scraper.
 
 ---
 
 ## Licenza
 
-Il **codice sorgente** di questo progetto è distribuito sotto licenza **MIT**.  
+Il **codice sorgente** di questo progetto è distribuito sotto licenza **MIT**. 
+
 Ciò significa che il software può essere utilizzato, modificato e ridistribuito liberamente, nel rispetto dei termini della licenza.
 
 Il testo completo della licenza è disponibile nel file [LICENSE](./LICENSE).

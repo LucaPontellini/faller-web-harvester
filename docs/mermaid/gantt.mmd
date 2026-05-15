@@ -1,0 +1,48 @@
+gantt
+    dateFormat  YYYY-MM-DD
+    title Piano di sviluppo - Faller Scraper
+    axisFormat %d/%m
+    tickInterval 1day
+    
+    section Avvio del progetto
+    Inizio del progetto                           :milestone, crit, m0, 2026-04-10, 0d
+
+    section Analisi e documentazione
+    Studio del problema e del sito Faller            :done, a1, after m0, 4d
+    Stesura del documento dei requisiti              :done, a2, after a1, 9d
+    Revisione e correzione del documento             :done, a3, after a2, 1d
+    Conclusione della fase dei requisiti             :milestone, crit, m1, after a3, 0d
+
+    section Sviluppo dello scraper base
+    Scraper base                                     :done, b1, after m1, 3d
+    Test dello scraper base                          :done, t1, after b1, 1d
+
+    section Parsing dei dati del prodotto
+    Parsing dei dati del prodotto                    :done, b2, after t1, 3d
+    Test del parsing                                 :done, t2, after b2, 1d
+
+    section Download dei file
+    Download delle immagini e PDF                    :done, b3, after t2, 2d
+    Test del download dei file                       :done, t3, after b3, 1d
+
+    section Export dei dati
+    Export Excel e ZIP                               :done, b4, after t3, 2d
+    Test dell'export                                 :done, t4, after b4, 1d
+
+    section Database
+    Progettazione SQLite                            :done, c1, after t4, 1d
+    Integrazione del database                        :done, c2, after c1, 1d
+    Test del database                                :done, t5, after c2, 1d
+
+    section Funzionalità avanzate
+    Filtri e ricerca dei prodotti                    :done, d1, after t5, 1d
+    Ottimizzazione e gestione degli errori           :done, d2, after d1, 1d
+
+    section Evoluzione dell'interfaccia
+    Interfaccia Flask                                :done, e1, after d2, 1d
+
+    section Test finale
+    Test completo del sistema                        :done, tf, after e1, 1d
+
+    section Consegna
+    Consegna progetto finale                         :milestone, crit, m2, 2026-05-15, 0d

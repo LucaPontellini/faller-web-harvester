@@ -1,0 +1,43 @@
+classDiagram
+
+    %% ENTITÀ:
+    class User {
+        +int id
+        +string username
+        +string role
+        +__init__(self, id, username, role)
+        +is_authenticated() bool
+        +is_active() bool
+        +is_anonymous() bool
+        +get_id() string
+        +get(user_id, db)$ User
+    }
+
+    class Product {
+        +string code
+        +int exists
+        +string product_link
+        +string name
+        +string price
+        +string availability
+        +string category
+        +string ean
+        +string scale_image
+        +string epoch
+        +string dimensions
+        +string difficulty
+        +string delivery_date
+        +string lighting_or_electronics
+        +string construction_instruction
+        +string kit_contains
+        +string description
+        +string image_main
+        +list all_photos
+        +list all_layouts
+        +string manual_pdf
+        +string safety_pdf
+        +__init__(self, data)
+    }
+
+    %% RELAZIONI
+    User "1" --> "0..*" Product : gestisce
