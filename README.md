@@ -96,11 +96,17 @@ Nella cartella `docs/` sono disponibili i seguenti artefatti grafici:
 * **[Schema Entità-Relazione (ER)](./docs/mermaid/erDiagram.mmd)**: Struttura del database SQLite.
 * **[Diagramma delle Classi](./docs/mermaid/classDiagram.mmd)**: Relazioni tra modelli e repository.
 * **[Gantt](./docs/mermaid/gantt.mmd)**: Cronoprogramma dello sviluppo.
-
-### Work in Progress
-
-* **Manuale Utente (User Guide)**: Guida illustrata alla navigazione della Dashboard.
-* **Test Suite**: Documentazione dei test unitari (Pytest) per la validazione dello scraper.
+* **[Test Suite](./docs/Test%20Suite.md)**: Documentazione dei test unitari (Pytest) per la validazione dello scraper. La suite garantisce l'integrità del codice ed è composta dai seguenti moduli di verifica:
+    * [Configurazione e Fixture (`conftest.py`)](./webapp/tests/conftest.py): Gestione del ciclo di vita del database SQLite di test e isolamento delle cartelle multimediali.
+    * [Validazione Input (`test_validators.py`)](./webapp/tests/test_validators.py): Verifica dei codici prodotto Faller (da 4 a 8 cifre), estensioni consentite e integrità tramite hash MD5.
+    * [Logica di Autenticazione (`test_auth.py`)](./webapp/tests/test_auth.py): Controllo dei flussi di registrazione, credenziali errate e gestione degli utenti duplicati.
+    * [Motore di Scraping (`test_scraper.py`)](./webapp/tests/test_scraper.py): Testing isolato dalla rete tramite mock per la verifica del parsing della versione inglese del catalogo.
+    * [Strato di Persistenza (`test_repository.py`)](./webapp/tests/test_repository.py): Convalida delle query CRUD e della gestione della logica di `UPSERT` sui vincoli di unicità di SQLite.
+    * [Sicurezza e Ruoli (`test_security.py`)](./webapp/tests/test_security.py): Verifica dei permessi di accesso basati sui ruoli (RBAC) per la protezione dell'area `/admin/`.
+    * [Rotte e Endpoint (`test_routes.py`)](./webapp/tests/test_routes.py): Controllo del routing di Flask, accessibilità della Landing Page e degli endpoint di progresso.
+    * [Gestione File Multimediali (`test_media.py`)](./webapp/tests/test_media.py): Controllo del salvataggio locale e dell'organizzazione su disco di immagini (`_main.jpg`) e PDF.
+    * [Generazione Report (`test_export.py`)](./webapp/tests/test_export.py): Validazione della struttura e della corretta scrittura dei file report Excel (`.xlsx`).
+    * [Modulo di Compressione (`test_archiver.py`)](./webapp/tests/test_archiver.py): Verifica della creazione automatica degli archivi compressi ZIP per il download.
 
 ---
 

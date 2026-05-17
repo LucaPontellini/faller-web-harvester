@@ -45,7 +45,5 @@ faller_catalogo/
 # Quando si deve condividere il progetto bisogna togleire queste righe da questo file
 # Evita di condividere il codice del progetto
 webapp/
-# Evita di condividere il documento
-docs/Project Structure (PS).md
 # Evita di condividere run.py
 run.py
