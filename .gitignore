@@ -47,5 +47,3 @@ faller_catalogo/
 webapp/blueprints
 webapp/static
 webapp/templates
-webapp/tests
-webapp/pytest.ini
