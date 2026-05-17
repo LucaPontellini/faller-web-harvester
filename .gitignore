@@ -44,6 +44,14 @@ faller_catalogo/
 
 # Quando si deve condividere il progetto bisogna togleire queste righe da questo file
 # Evita di condividere il codice del progetto
-webapp/
-# Evita di condividere run.py
-run.py
+webapp/blueprints
+webapp/models
+webapp/repositories
+webapp/services
+webapp/static
+webapp/templates
+webapp/tests
+webapp/pytest.ini
+webapp/utils
+webapp/schema.sql
+webapp/db.py
