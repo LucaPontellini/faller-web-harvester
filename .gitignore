@@ -45,7 +45,6 @@ faller_catalogo/
 # Quando si deve condividere il progetto bisogna togliere queste righe da questo file
 # Evita di condividere il codice del progetto
 webapp/blueprints
-webapp/services/io
 webapp/static
 webapp/templates
 webapp/tests
