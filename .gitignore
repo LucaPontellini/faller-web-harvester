@@ -46,7 +46,6 @@ faller_catalogo/
 # Evita di condividere il codice del progetto
 webapp/blueprints
 webapp/services/io
-webapp/services/scraper
 webapp/static
 webapp/templates
 webapp/tests
