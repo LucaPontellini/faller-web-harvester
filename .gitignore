@@ -42,12 +42,12 @@ faller_catalogo/
 
 
 
-# Quando si deve condividere il progetto bisogna togleire queste righe da questo file
+# Quando si deve condividere il progetto bisogna togliere queste righe da questo file
 # Evita di condividere il codice del progetto
 webapp/blueprints
-webapp/services
+webapp/services/io
+webapp/services/scraper
 webapp/static
 webapp/templates
 webapp/tests
 webapp/pytest.ini
-webapp/utils
