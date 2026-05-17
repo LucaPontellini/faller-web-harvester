@@ -1,18 +1,39 @@
 classDiagram
+    %% ENTITÀ: CONFIGURAZIONE CENTRALIZZATA
+    class Config {
+        +string PROJECT_ROOT
+        +string BASE_STORAGE
+        +string IMG_DIR
+        +string PDF_DIR
+        +string EXPORT_DIR
+        +string EXCEL_FILENAME
+        +string DATABASE
+        +string SECRET_KEY
+        +string BASE_URL
+        +string BASE_SEARCH
+        +string STATIC_SAFETY_PDF
+        +dict LANG_MAP
+        +dict FIELD_TO_DB_COLUMN
+        +dict SELECTORS
+        +list USER_AGENTS
+        +get_random_headers() : dict
+        +init_app(app) : None
+    }
 
-    %% ENTITÀ:
+    %% ENTITÀ: UTENTE
     class User {
         +int id
         +string username
         +string role
-        +__init__(self, id, username, role)
-        +is_authenticated() bool
-        +is_active() bool
-        +is_anonymous() bool
-        +get_id() string
-        +get(user_id, db)$ User
+        +__init__(self, id, username, role) : None
+        +is_authenticated(self) : bool
+        +is_active(self) : bool
+        +is_anonymous(self) : bool
+        +get_id(self) : string
+        +get(user_id, db) : User
     }
 
+    %% ENTITÀ: PRODOTTO
     class Product {
         +string code
         +int exists
@@ -36,8 +57,9 @@ classDiagram
         +list all_layouts
         +string manual_pdf
         +string safety_pdf
-        +__init__(self, data)
+        +__init__(self, data) : None
     }
 
     %% RELAZIONI
     User "1" --> "0..*" Product : gestisce
+    Product ..> Config : usa impostazioni
