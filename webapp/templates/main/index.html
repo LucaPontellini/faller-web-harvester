@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row align-items-center py-5">
+    <div class="col-lg-6">
+
+        <!-- Titolo principale della homepage -->
+        <h1 class="display-3 fw-bold">
+            Dati Faller,<br>
+            <span class="text-primary">a portata di clic.</span>
+        </h1>
+
+        <!-- Sottotitolo descrittivo -->
+        <p class="lead mt-4 text-muted">
+            Estrai automaticamente immagini, descrizioni e manuali PDF direttamente dal catalogo ufficiale.
+        </p>
+
+        <!-- Pulsanti azione (dashboard, admin, login, scraper) -->
+        <div class="mt-5">
+            {% if current_user.is_authenticated %}
+                
+                <!-- Se l'utente è admin -->
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-danger btn-lg px-4 me-md-2 shadow">
+                        Pannello Admin
+                    </a>
+
+                <!-- Se l'utente è un utente normale -->
+                {% else %}
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-4 me-md-2 shadow">
+                        La Tua Dashboard
+                    </a>
+                {% endif %}
+
+                <!-- Pulsante per andare sulla pagina dello scraper -->
+                <a href="{{ url_for('harvester.scraper') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    Avvia Scraper
+                </a>
+
+            {% else %}
+                <!-- Se non autenticato: invito al login -->
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 me-md-2 shadow">
+                    Inizia Ora
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Immagine illustrativa (visibile solo su desktop) -->
+    <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+        <img src="{{ url_for('static', filename='gif/DATABASE_icon.gif') }}" alt="Database Harvester" style="width: 100%; max-width: 520px;">
+    </div>
+</div>
+
+<!-- Sezione delle tre feature principali -->
+<div class="row mt-5 g-4">
+
+    <!-- Feature: Export Excel -->
+    <div class="col-md-4 text-center">
+        <div class="card p-4 shadow-sm h-100 border-0">
+            <img src="{{ url_for('static', filename='img/EXCEL_icon.png') }}"
+                 class="mb-3 mx-auto"
+                 style="height: 72px; width: 72px;">
+            <h5 class="fw-bold">Export Excel</h5>
+            <p class="text-muted">Scarica tutti i dati tecnici in fogli di calcolo pronti all'uso.</p>
+        </div>
+    </div>
+
+    <!-- Feature: Archivio ZIP -->
+    <div class="col-md-4 text-center">
+        <div class="card p-4 shadow-sm h-100 border-0">
+            <img src="{{ url_for('static', filename='gif/ZIP_icon.gif') }}"
+                 class="mb-3 mx-auto"
+                 style="height: 72px; width: 72px;">
+            <h5 class="fw-bold">Archivio Media</h5>
+            <p class="text-muted">Scarica immagini e manuali PDF organizzati in cartelle ZIP.</p>
+        </div>
+    </div>
+
+    <!-- Feature: Scraping Rapido -->
+    <div class="col-md-4 text-center">
+        <div class="card p-4 shadow-sm h-100 border-0">
+            <img src="{{ url_for('static', filename='gif/SCRAPER_icon.gif') }}"
+                 class="mb-3 mx-auto"
+                 style="height: 72px; width: 72px;">
+            <h5 class="fw-bold">Scraping Rapido</h5>
+            <p class="text-muted">Algoritmi ottimizzati per non sovraccaricare il server sorgente.</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

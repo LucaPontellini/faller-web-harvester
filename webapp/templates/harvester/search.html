@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Sezione del Layout Principale -->
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+
+        <!-- Card Principale del Form -->
+        <div class="card shadow">
+
+            <!-- Header della card -->
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Avvia Nuovo Scaricamento</h4>
+            </div>
+
+            <!-- Corpo della card -->
+            <div class="card-body">
+
+                <!-- Descrizione introduttiva -->
+                <p class="text-muted">Inserisci l'intervallo di codici prodotto Faller da scansionare.</p>
+
+                <!-- Form di inserimento del Range -->
+                <form id="scraping-form">
+
+                    <!-- Riga con i due input numerici -->
+                    <div class="row">
+
+                        <!-- Input per il codice iniziale -->
+                        <div class="col">
+                            <label class="form-label">Codice Inizio</label>
+                            <!-- min="0" impedisce numeri negativi -->
+                            <input type="number" id="start_code" class="form-control" placeholder="es. 130101" required min="0">
+                        </div>
+
+                        <!-- Input per il codice finale -->
+                        <div class="col">
+                            <label class="form-label">Codice Fine</label>
+                            <!-- min="0" impedisce numeri negativi -->
+                            <input type="number" id="end_code" class="form-control" placeholder="es. 130105" required min="0">
+                        </div>
+
+                    </div>
+
+                    <!-- Bottone di Invio dell'Harvester. Disabilitato se l'utente è l'admin -->
+                    <button type="submit" class="btn btn-success w-100 mt-4" id="start-btn"
+                            {% if current_user.role == 'admin' %} disabled {% endif %}>
+                        <i class="bi bi-play-fill"></i> 
+                        {% if current_user.role == 'admin' %}
+                            Modalità Monitoraggio (Admin)
+                        {% else %}
+                            Avvia Harvester
+                        {% endif %}
+                    </button>
+
+                    <!-- Messaggio informativo per l'admin -->
+                    {% if current_user.role == 'admin' %}
+                        <p class="text-danger mt-2 text-center small">
+                            L'amministratore può monitorare il progresso ma non può avviare nuove estrazioni.
+                        </p>
+                    {% endif %}
+
+                </form>
+
+                <!-- Area di Stato (spinner). Mostrata solo durante l'esecuzione -->
+                <div id="status-area" class="mt-4 d-none">
+                    <div class="spinner-border text-primary btn-sm" role="status"></div>
+                    <span class="ms-2">Scaricamento in corso... attendere.</span>
+                </div>
+
+            </div> <!-- Fine del card-body -->
+        </div> <!-- Fine della card -->
+
+    </div>
+</div>
+
+<!-- Script esterno per il Form -->
+<script src="{{ url_for('static', filename='js/scraper_range.js') }}"></script>
+
+{% endblock %}

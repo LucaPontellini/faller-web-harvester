@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Contenitore principale -->
+<div class="container-fluid py-4 px-5" id="dashboardContainer" data-total-products="{{ total_products or 0 }}">
+
+    <!-- Foglio di stile dedicato alla dashboard dell'admin -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+
+    <!-- Header della Dashboard -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-uppercase">Admin Control Panel</h2>
+        <!-- Badge con nome dell'utente loggato -->
+        <span class="badge bg-dark px-3 py-2">Sessione: {{ current_user.username }}</span>
+    </div>
+
+    <!-- Cards delle Statistiche -->
+    <div class="row g-3 mb-4 text-center">
+
+        <!-- Totale dei prodotti censiti -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border h-100">
+                <h6 class="text-muted small text-uppercase">Catalogo</h6>
+                <h3 id="total-count" class="fw-bold mb-0">8</h3>
+                <small class="text-muted">Modelli censiti</small>
+            </div>
+        </div>
+
+        <!-- Totale delle immagini -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border h-100 border-success-subtle">
+                <h6 class="text-muted small text-uppercase text-success">Galleria Foto</h6>
+                <h3 id="img-count" class="text-success fw-bold mb-0">54</h3>
+                <small class="text-muted">Solo scatti modello</small>
+            </div>
+        </div>
+
+        <!-- Totale dei PDF -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border h-100 border-info-subtle">
+                <h6 class="text-muted small text-uppercase text-info">Documentazione</h6>
+                <h3 id="pdf-count" class="text-info fw-bold mb-0">16</h3>
+                <small class="text-muted">Manuali + Schemi Layout</small>
+            </div>
+        </div>
+
+        <!-- Stato del sistema -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm border h-100">
+                <h6 class="text-muted small text-uppercase">Stato Sistema</h6>
+                <p id="statusText" class="mb-0 fw-bold text-primary">READY</p>
+                <small class="text-muted">Scansione completata</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione delle Azioni (3 colonne) -->
+    <div class="row g-3 align-items-stretch">
+
+        <!-- Colonna del Database -->
+        <div class="col-md-4">
+            <div class="card p-3 h-100 shadow-sm border">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Database</h5>
+
+                <!-- Reset del catalogo -->
+                <button class="btn btn-danger w-100 mb-2 py-2 fw-bold"
+                        onclick="runAction('/admin/reset-catalog', 'POST')">
+                    RESET CATALOGO
+                </button>
+
+                <!-- Esportazione dell'Excel -->
+                <button class="btn btn-primary w-100 mb-2 py-2 fw-bold"
+                        onclick="exportExcel()">
+                    EXPORT EXCEL
+                </button>
+
+                <!-- Controllo dei duplicati -->
+                <button class="btn btn-secondary w-100 py-2 fw-bold"
+                        onclick="runAction('/admin/check-duplicates')">
+                    CONTROLLA DUPLICATI
+                </button>
+            </div>
+        </div>
+
+        <!-- Colonna per la Manutenzione e l'Asset -->
+        <div class="col-md-4">
+            <div class="card p-3 h-100 shadow-sm border">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Manutenzione Asset</h5>
+
+                <div class="row g-2 mb-2">
+
+                    <!-- Azioni per le immagini -->
+                    <div class="col-6 text-center">
+                        <button class="btn btn-outline-dark w-100 mb-2 fw-bold py-2"
+                                onclick="runAction('/admin/scan-images')">
+                            SCAN IMG
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-danger w-100 fw-bold"
+                                onclick="confirmDelete('images')">
+                            ELIMINA IMG
+                        </button>
+                    </div>
+
+                    <!-- Azioni per i PDF -->
+                    <div class="col-6 text-center">
+                        <button class="btn btn-outline-dark w-100 mb-2 fw-bold py-2"
+                                onclick="runAction('/admin/scan-pdf')">
+                            SCAN PDF
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-danger w-100 fw-bold"
+                                onclick="confirmDelete('pdf')">
+                            ELIMINA PDF
+                        </button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Pulizia della console -->
+                <button class="btn btn-outline-secondary w-100 py-2 fw-bold"
+                        onclick="clearConsole()">
+                    PULISCI CONSOLE
+                </button>
+            </div>
+        </div>
+
+        <!-- Colonna dei Pannelli di Estrazione -->
+        <div class="col-md-4">
+            <div class="card p-3 h-100 shadow-sm border text-center">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Pannelli Estrazione</h5>
+
+                <!-- Link della gestione dello scraper -->
+                <a href="/harvester/harvester"
+                   class="btn btn-dark w-100 mb-2 py-2 fw-bold">
+                    GESTIONE SCRAPER
+                </a>
+
+                <!-- Link di ricerca/import -->
+                <a href="/harvester/search"
+                   class="btn btn-outline-primary w-100 py-2 fw-bold">
+                    RICERCA & IMPORT
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Console e Progress Bar -->
+    <div class="mt-4">
+        <div class="card p-3 shadow border-0"
+             style="background:#0d0d0d; min-height:420px; border-radius: 8px;">
+
+            <!-- Barra di avanzamento -->
+            <div class="mb-3">
+                <div style="background:#1a1a1a; height:14px; border-radius:20px; overflow:hidden; border: 1px solid #333;">
+                    <div id="bar" style="
+                        width:0%;
+                        height:100%;
+                        background: linear-gradient(90deg, #00d2ff 0%, #928dab 50%, #00ff9d 100%);
+                        background-size: 200% 100%;
+                        transition: width 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+                        animation: gradientMove 2s linear infinite;
+                    "></div>
+                </div>
+
+                <!-- Testi della barra -->
+                <div class="d-flex justify-content-between mt-2">
+                    <small id="statusSubText" class="text-uppercase fw-bold" style="color: #555;">Ready</small>
+                    <small id="barText" class="fw-bold" style="color: #00ff9d;">0%</small>
+                </div>
+            </div>
+
+            <!-- Console dei log -->
+            <div id="logBox" style="
+                height:300px;
+                overflow-y:auto;
+                margin:0;
+                font-family:'Courier New', monospace;
+                font-size: 0.95rem;
+                background: rgba(0,0,0,0.1);
+                padding: 15px;
+                border: 1px solid #222;
+                color: #00d2ff;
+            ">
+                [INFO] Sistema pronto...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script JS dedicato alla dashboard -->
+<script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+{% endblock %}

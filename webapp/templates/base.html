@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Titolo dinamico -->
+    <title>{{ title if title else "Faller Harvester" }}</title>
+
+    <!-- Bootstrap del CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Foglio di stile personalizzato -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+</head>
+
+<body>
+
+    <!-- Navbar principale -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+
+            <!-- Logo cliccabile -->
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                <div class="brand-logo-container me-3">
+                    <img src="{{ url_for('static', filename='img/FALLER_logo.jpg') }}" 
+                         alt="Faller Logo" class="logo-top">
+                    <img src="{{ url_for('static', filename='img/WEB_HARVESTER.jpg') }}" 
+                         alt="Web Harvester Logo" class="logo-bottom">
+                </div>
+            </a>
+
+            <!-- Bottone mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Menu di navigazione -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <!-- Link principali -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </li>
+
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Dropdown dell'Estrazione -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-search"></i> Estrazione
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('harvester.scraper') }}">Lista Codici</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('harvester.search') }}">Intervallo Numerico</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Area dell'utente (login/logout) -->
+                <div class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">Cambia Password</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Accedi</a>
+                        <a class="btn btn-danger ms-lg-2" href="{{ url_for('auth.register') }}">Registrati</a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenitore principale -->
+    <div class="container mt-4">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Contenuto dinamico delle pagine -->
+        {% block content %}{% endblock %}
+
+        <!-- Footer -->
+        <footer class="mt-5 mb-3 text-center footer-text text-muted">
+            <hr>
+            &copy; 2026 Faller Web Harvester - Progetto ad uso personale
+        </footer>
+    </div>
+
+    <!-- Bootstrap del JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+<!-- ==========================================================================================================================================
+ COS'È BOOTSTRAP (spiegato per chi non lo conosce)
+-----------------------------------------------------------
+ Bootstrap è un framework CSS e JavaScript che aiuta a creare siti web moderni, ordinati e responsive senza dover scrivere tutto da zero.
+
+ A cosa serve:
+ • Fornisce stili già pronti (bottoni, card, navbar, alert…)
+ • Permette di creare layout che si adattano automaticamente
+   a PC, tablet e smartphone
+ • Include componenti interattivi come dropdown, modali,
+   tooltip, caroselli e menu mobile
+ • Offre centinaia di classi utility per margini, colori,
+   testi, allineamenti e molto altro
+
+ In pratica: rende più veloce e semplice costruire un sito professionale anche senza essere esperti di CSS.
+
+ Documentazione completa: https://getbootstrap.com/docs/
+========================================================================================================================================== -->

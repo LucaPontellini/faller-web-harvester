@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Archivio Faller{% endblock %}
+
+{% block content %}
+<!-- Caricamento risorse esterne e foglio di stile specifico per la dashboard -->
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+
+<div class="container-fluid py-4 px-5">
+    <div class="catalog-header d-flex justify-content-between align-items-center">
+        <h1 class="catalog-title m-0">Catalog <span class="text-danger">Archive</span></h1>
+        <div style="width: 450px;">
+            <div class="input-group">
+                <!-- Input di ricerca collegato a un datalist per l'autocompletamento dei codici -->
+                <input type="text" id="filterInput" class="form-control search-input" placeholder="Cerca codice, nome, EAN e premi INVIO..." list="productsList">
+                <span class="input-group-text bg-white border-start-0"><i class="bi bi-search"></i></span>
+
+                <datalist id="productsList">
+                    {% for p in products|sort(attribute='code') %}
+                    <option value="{{ p.code }}">{{ p.name }}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GUIDA: Fornisce istruzioni operative all'utente finale -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{{ url_for('static', filename='gif/INFO_icon.gif') }}" alt="Info" style="width:26px; height:26px; object-fit:contain;">
+                        <h4 class="modal-title fw-bold m-0">Guida Dashboard Faller Archive</h4>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h5 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                        <img src="{{ url_for('static', filename='gif/SCRAPER_icon.gif') }}" style="width:22px; height:22px;">
+                        Ricerca Prodotti
+                    </h5>
+                    <p>Usa la barra di ricerca in alto per cercare:</p>
+                    <ul>
+                        <li>Codice prodotto</li>
+                        <li>Nome articolo</li>
+                        <li>EAN</li>
+                        <li>Categoria</li>
+                    </ul>
+                    <p><strong>INVIO</strong> esegue scroll automatico ed evidenziazione.</p>
+                    <hr>
+                    <h5 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                        <img src="{{ url_for('static', filename='gif/ZIP_icon.gif') }}" style="width:22px; height:22px;">
+                        Selezione Multipla
+                    </h5>
+                    <ul>
+                        <li>ZIP MEDIA → immagini + PDF</li>
+                        <li>EXCEL → esportazione database</li>
+                        <li>ELIMINA → rimozione completa file</li>
+                    </ul>
+                    <hr>
+                    <h5 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                        <img src="{{ url_for('static', filename='gif/IMAGE_icon.gif') }}" style="width:22px; height:22px;">
+                        Gallery & Documenti
+                    </h5>
+                    <ul>
+                        <li>Foto prodotto, Layout, Manuali PDF e Safety sheet.</li>
+                    </ul>
+                    <hr>
+                    <h5 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                        <img src="{{ url_for('static', filename='gif/DATABASE_icon.gif') }}" style="width:22px; height:22px;">
+                        Stato Disponibilità
+                    </h5>
+                    <div class="d-flex gap-4 flex-wrap">
+                        <div><span class="badge bg-success">Verde</span> disponibile</div>
+                        <div><span class="badge bg-warning text-dark">Giallo</span> in attesa</div>
+                        <div><span class="badge bg-danger">Rosso</span> non disponibile</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark px-4" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    {% if products %}
+    <!-- Barra azioni globali: gestione dei download massivi e trigger dello scraper -->
+    <div class="d-flex justify-content-between mb-4 align-items-center">
+        <div><strong>Selezionati:</strong> <span id="count" class="text-danger fw-bold">0</span></div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('harvester.scraper') }}" class="btn-export">
+                <img src="{{ url_for('static', filename='gif/SCRAPER_icon.gif') }}" style="width:20px; margin-right:8px;"> RUN SCRAPER
+            </a>
+            <button id="zipBtn" onclick="zipSelected()" class="btn-export" data-url="{{ url_for('export_api.download_zip') }}">
+                <img src="{{ url_for('static', filename='gif/Zip_icon.gif') }}" style="width:20px; margin-right:8px;"> ZIP MEDIA
+            </button>
+            <a href="{{ url_for('export_api.download_excel') }}" class="btn-export">
+                <img src="{{ url_for('static', filename='img/EXCEL_icon.png') }}" style="width:20px; margin-right:8px;"> EXCEL
+            </a>
+            <button onclick="deleteSelected()" class="btn-export text-danger">
+                <img src="{{ url_for('static', filename='gif/TRASH_icon.gif') }}" style="width:20px; margin-right:8px;"> ELIMINA
+            </button>
+            <button class="btn-export" data-bs-toggle="modal" data-bs-target="#helpModal">
+                <img src="{{ url_for('static', filename='gif/INFO_icon.gif') }}" alt="Guida" style="width:20px; height:20px; margin-right:8px;"> GUIDA
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="faller-table" id="productsTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"><input type="checkbox" id="masterCheck"></th>
+                    <th>Anteprima</th>
+                    <th>Identificazione</th>
+                    <th style="width: 25%;">Dettagli Prodotto</th>
+                    <th>Tecnico</th>
+                    <th>Gallery Foto</th>
+                    <th>Documenti & Layout</th>
+                    <th class="text-end">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products|sort(attribute='code') %}
+                <tr data-code="{{ p.code }}">
+                    <td class="text-center align-middle">
+                        <input type="checkbox" class="product-cb" value="{{ p.code }}">
+                    </td>
+                    
+                    <td>
+                        <div class="img-wrapper">
+                            <!-- Visualizzazione dell'immagine principale o placeholder se assente -->
+                            {% if p.image_main and p.image_main != 'N/A' %}
+                            <img src="{{ url_for('main.serve_catalogo_image', filename=p.image_main) }}" class="img-full">
+                            {% else %}
+                            <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted small">NO IMG</div>
+                            {% endif %}
+                            
+                            <!-- Logica per il colore del dot di stato basata sulla stringa di disponibilità -->
+                            {% set avail = (p.availability or '') | lower %}
+                            <div class="status-indicator {% if 'immediately' in avail %}status-available{% elif 'waiting' in avail %}status-waiting{% else %}status-unavailable{% endif %}" title="{{ p.availability }}"></div>
+                        </div>
+                        {% if p.delivery_date and p.delivery_date != 'N/A' %}
+                            <div class="delivery-info text-center"><i class="bi bi-clock-history"></i> {{ p.delivery_date }}</div>
+                        {% endif %}
+                    </td>
+                
+                    <td>
+                        <span class="col-code">{{ p.code }}</span>
+                        <span class="col-ean">{{ p.ean if p.ean and p.ean != 'N/A' else 'EAN N/A' }}</span>
+                        {% if p.scale_image and p.scale_image != 'N/A' %}
+                            <img src="{{ p.scale_image }}" class="gauge-icon mt-2">
+                        {% endif %}
+                    </td>
+                
+                    <td>
+                        <span class="col-name">{{ p.name }}</span>
+                        <span class="text-muted small text-uppercase" style="font-size: 0.6rem;">{{ p.category }}</span>
+                        <!-- Toggle interattivo per espandere/comprimere le descrizioni lunghe -->
+                        <div class="desc-wrapper" onclick="this.classList.toggle('expanded')">
+                            <div class="desc-text">{{ p.description or 'Nessuna descrizione.' }}</div>
+                            <span class="desc-hint">Espandi descrizione</span>
+                        </div>
+                    </td>
+                
+                    <td>
+                        <span class="tech-label">Dimensioni / Epoca</span>
+                        <span class="tech-value">{{ p.dimensions }} | {{ p.epoch }}</span>
+                        <span class="tech-label">Prezzo / Difficoltà</span>
+                        <span class="tech-value">{{ p.price if p.price else 'N/A' }} | {{ p.difficulty if p.difficulty else 'N/A' }}</span>
+                        {% if p.lighting_or_electronics and p.lighting_or_electronics != 'N/A' %}
+                            <span class="tech-label">Elettronica</span>
+                            <span class="tech-value text-primary"><i class="bi bi-lightbulb"></i> {{ p.lighting_or_electronics }}</span>
+                        {% endif %}
+                    </td>
+                
+                    <td>
+                        <!-- Loop dinamico per generare i link di download per le 10 immagini della galleria -->
+                        <div class="download-container">
+                            {% for i in range(1, 11) %}
+                                {% set p_key = 'photo_' ~ i %}
+                                {% if p[p_key] and p[p_key] != 'N/A' %}
+                                <a href="{{ url_for('main.serve_catalogo_image', filename=p[p_key]) }}" target="_blank" class="download-item">
+                                    <img src="{{ url_for('static', filename='gif/IMAGE_icon.gif') }}" class="download-icon">
+                                    <span class="download-label">Foto {{ i }}</span>
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                
+                    <td>
+                        <!-- Gestione dinamica di PDF tecnici e link esterni alle istruzioni web -->
+                        <div class="download-container">
+                            {% if p.manual_pdf and p.manual_pdf != 'N/A' %}
+                            <a href="{{ url_for('main.serve_pdfs', filename=p.manual_pdf) }}" target="_blank" class="download-item">
+                                <img src="{{ url_for('static', filename='gif/PDF_icon.gif') }}" class="download-icon">
+                                <span class="download-label">Manuale</span>
+                            </a>
+                            {% endif %}
+                            
+                            {% if p.safety_pdf and p.safety_pdf != 'N/A' %}
+                            <a href="{{ url_for('main.serve_pdfs', filename=p.safety_pdf) }}" target="_blank" class="download-item">
+                                <img src="{{ url_for('static', filename='gif/PDF_icon.gif') }}" class="download-icon">
+                                <span class="download-label">Safety</span>
+                            </a>
+                            {% endif %}
+                            
+                            {% if p.construction_instruction and p.construction_instruction != 'N/A' and p.construction_instruction|length > 5 %}
+                            <a href="{{ p.construction_instruction }}" target="_blank" class="download-item">
+                                <img src="{{ url_for('static', filename='gif/SCRAPER_icon.gif') }}" class="download-icon">
+                                <span class="download-label">Web Instr.</span>
+                            </a>
+                            {% endif %}
+                        
+                            <!-- Loop dedicato ai file di layout (solitamente schemi di tracciato) -->
+                            {% for i in range(1, 11) %}{% set l_key = 'layout_' ~ i %}{% if p[l_key] and p[l_key] != 'N/A' %}
+                            <a href="{{ url_for('main.serve_catalogo_image', filename=p[l_key]) }}" target="_blank" class="download-item">
+                                <img src="{{ url_for('static', filename='gif/PDF_icon.gif') }}" class="download-icon">
+                                <span class="download-label">Layout {{ i }}</span>
+                            </a>{% endif %}{% endfor %}
+                        </div>
+                    </td>
+                
+                    <td class="text-end">
+                        <div class="d-flex flex-column align-items-end gap-2">
+                            <a href="{{ p.product_link }}" target="_blank" class="text-secondary" title="Vai al sito Faller">
+                                <i class="bi bi-box-arrow-up-right fs-5"></i>
+                            </a>
+                            <!-- Funzione per l'eliminazione del singolo record tramite API -->
+                            <button onclick="deleteSingle('{{ p.code }}')" class="btn btn-link text-danger p-0" title="Elimina singolo">
+                                <i class="bi bi-trash3 fs-6"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info border-0">Nessun prodotto trovato. Avvia lo scraper.</div>
+    {% endif %}
+</div>
+
+<!-- Script esterno per la logica dei checkbox e le chiamate fetch asincrone -->
+<script src="{{ url_for('static', filename='js/user_dashboard.js') }}"></script>
+{% endblock %}

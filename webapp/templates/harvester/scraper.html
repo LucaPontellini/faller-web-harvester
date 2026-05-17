@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Scraper - Faller Harvester{% endblock %}
+
+{% block content %}
+
+<!-- Contenitore Principale -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+            <!-- Card del Form per l'Inserimento dei Dati -->
+            <div class="card shadow">
+
+                <!-- Header della card -->
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Avvia Estrazione Dati</h4>
+                </div>
+
+                <!-- Corpo della card -->
+                <div class="card-body">
+
+                    <!-- Testo introduttivo -->
+                    <p>Inserisci i codici prodotto Faller separati da una virgola o uno per riga.</p>
+
+                    <!-- Form di Invio dello Scraping -->
+                    <form id="scraper-form">
+
+                        <!-- Campo textarea per i codici -->
+                        <div class="mb-3">
+                            <label for="codes" class="form-label">Codici Articolo</label>
+
+                            <!-- Textarea: supporta input multipli -->
+                            <textarea class="form-control"
+                                      id="codes"
+                                      name="codes"
+                                      rows="5"
+                                      placeholder="110115&#10;120110..."></textarea>
+                        </div>
+
+                        <!-- Bottone di invio -->
+                        <div class="d-grid">
+                            <button type="submit"
+                                    class="btn btn-success btn-lg"
+                                    id="start-btn"
+                                    {% if current_user.role == 'admin' %} disabled {% endif %}>
+
+                                <!-- Testo dinamico in base al ruolo -->
+                                {% if current_user.role == 'admin' %}
+                                    Sola Visualizzazione (Admin)
+                                {% else %}
+                                    Avvia Scaricamento
+                                {% endif %}
+                            </button>
+                        </div>
+
+                        <!-- Messaggio informativo per l'admin -->
+                        {% if current_user.role == 'admin' %}
+                            <p class="text-danger mt-2 text-center small">
+                                L'amministratore può monitorare il progresso ma non può avviare nuove estrazioni.
+                            </p>
+                        {% endif %}
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sezione del Progresso dello Scraping -->
+            <div id="progress-area" class="mt-4 d-none">
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+
+                        <h5>Progresso Estrazione</h5>
+
+                        <!-- Barra di avanzamento -->
+                        <div class="progress mb-2" style="height: 25px;">
+                            <div id="progress-bar"
+                                 class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar"
+                                 style="width: 0%;">
+                                0%
+                            </div>
+                        </div>
+
+                        <!-- Testo di stato -->
+                        <p id="status-text" class="text-muted small">
+                            In attesa...
+                        </p>
+
+                    </div>
+                </div>
+
+            </div> <!-- Fine del progress-area -->
+
+        </div>
+    </div>
+</div>
+
+<!-- Script JS Esterno -->
+<script src="{{ url_for('static', filename='js/scraper.js') }}"></script>
+
+{% endblock %}

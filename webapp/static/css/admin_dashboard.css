@@ -1,0 +1,21 @@
+/* Animazione per lo sfondo in movimento (gradient shifting) */
+@keyframes gradientMove { 
+    0% { background-position: 0% 50%; } 
+    100% { background-position: 100% 50%; } 
+}
+
+/* Stile della scrollbar verticale della console (solo WebKit/Chrome/Edge) */
+#logBox::-webkit-scrollbar { 
+    width: 8px; 
+}
+
+/* Thumb della scrollbar: colore e arrotondamento */
+#logBox::-webkit-scrollbar-thumb { 
+    background: #333; 
+    border-radius: 10px; 
+}
+
+/* Spaziatura minima tra le righe della console */
+#logBox div { 
+    margin-bottom: 2px; 
+}

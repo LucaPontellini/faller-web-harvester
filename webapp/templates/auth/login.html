@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Login - Faller Harvester{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <!-- Card principale del form di login -->
+        <div class="card shadow">
+
+            <!-- Header della card -->
+            <div class="card-header bg-dark text-white text-center">
+                <h4 class="mb-0">Accesso</h4>
+            </div>
+
+            <!-- Corpo del form -->
+            <div class="card-body">
+                <form method="POST" id="loginForm">
+
+                    <!-- Campo username -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome Utente</label>
+                        <input type="text" name="username" id="username" class="form-control" required>
+                    </div>
+
+                    <!-- Campo password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </div>
+
+                    <!-- Messaggio di errore -->
+                    <div id="loginError" class="alert alert-danger py-2 small d-none">
+                        Inserisci almeno 3 caratteri in entrambi i campi.
+                    </div>
+
+                    <!-- Bottone di invio -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark">Accedi</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer con link alla registrazione -->
+            <div class="card-footer text-center text-muted">
+                Non hai un account? <a href="{{ url_for('auth.register') }}">Registrati</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Script esterno per la logica del login -->
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}
