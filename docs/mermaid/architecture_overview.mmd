@@ -1,0 +1,48 @@
+graph TD
+    %% Definizione degli attori del sistema
+    subgraph Clienti ["Attori / Accessi"]
+        U["Utente (Consultazione)"]
+        A["Amministratore (Gestione)"]
+    end
+
+    %% Livello di interfaccia e logica frontend
+    subgraph Livello_1 ["1 - Presentazione (Client-Side)"]
+        UI["Interfaccia Web<br/>(HTML, CSS)"]
+        JS["Logica Asincrona<br/>(JavaScript)"]
+        UI <--> JS %% Comunicazione bidirezionale tra DOM e logica JS
+    end
+
+    %% Gestione del routing e della sicurezza RBAC
+    subgraph Livello_2 ["2 - Controller (Backend)"]
+        Auth["Gestione Permessi<br/>(RBAC)"]
+        Routes["Rotte & API REST"]
+    end
+
+    %% Servizi di business (Core del sistema)
+    subgraph Livello_3 ["3 - Logica di Business (Core Services)"]
+        Scraper["Motore di Scraping"]
+        FileMgr["Gestione File & Archivi"]
+    end
+
+    %% Strato di memorizzazione dati
+    subgraph Livello_4 ["4 - Persistenza (Storage)"]
+        DB[("Database Relazionale<br/>(SQLite)")]
+        FS["File System Locale<br/>(Cartelle Media)"]
+    end
+
+    %% Fonte esterna (Target Web)
+    subgraph Esterno ["Risorsa Esterna"]
+        Faller["Sito Ufficiale Faller<br/>(Versione Inglese)"]
+    end
+
+    %% Flussi di comunicazione
+    U & A --> UI %% Gli attori interagiscono tramite UI
+    JS <-->|Richieste Fetch API| Routes %% Interazione client-server asincrona
+    Routes -->|Verifica Ruolo e Permessi| Auth %% Protezione rotte tramite RBAC
+    Routes -->|Innesca Job| Scraper %% Avvio processi di scraping
+    Routes -->|Richiede Dati/ZIP| FileMgr %% Gestione download e archivi
+    
+    Scraper <-->|Richieste HTTP / Estrazione HTML| Faller %% Estrazione dati live
+    Scraper -->|Salva Metadati| DB %% Persistenza dati strutturati
+    Scraper -->|Delega Download| FileMgr %% Gestione download asset
+    FileMgr -->|Salva/Legge Media| FS %% Archiviazione file binari

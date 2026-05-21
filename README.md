@@ -96,6 +96,7 @@ Nella cartella `docs/` sono disponibili i seguenti artefatti grafici:
 * **[Schema Entità-Relazione (ER)](./docs/mermaid/erDiagram.mmd)**: Struttura del database SQLite.
 * **[Diagramma delle Classi](./docs/mermaid/classDiagram.mmd)**: Relazioni tra modelli e repository.
 * **[Gantt](./docs/mermaid/gantt.mmd)**: Cronoprogramma dello sviluppo.
+* **[Project Postmortem (PP)](./docs/Project%20Postmortem%20(PP).md)**: Analisi critica del processo di sviluppo, riflessione sugli obiettivi raggiunti (e le difficoltà incontrate), l'evoluzione architetturale (dalla Fase 0 al sistema attuale) e valutazione finale delle competenze acquisite.
 * **[Test Suite](./docs/Test%20Suite.md)**: Documentazione dei test unitari (Pytest) per la validazione dello scraper. La suite garantisce l'integrità del codice ed è composta dai seguenti moduli di verifica:
     * [Configurazione e Fixture (`conftest.py`)](./webapp/tests/conftest.py): Gestione del ciclo di vita del database SQLite di test e isolamento delle cartelle multimediali.
     * [Validazione Input (`test_validators.py`)](./webapp/tests/test_validators.py): Verifica dei codici prodotto Faller (da 4 a 8 cifre), estensioni consentite e integrità tramite hash MD5.

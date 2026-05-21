@@ -13,12 +13,14 @@ faller-web-harvester/                                      # Root principale del
 │
 ├── docs/                                                  # Documentazione tecnica e diagrammi del progetto
 │   ├── images/                                            # Diagrammi esportati in formato immagine (.png, .jpg)
+│   │   ├── architecture_overview.png                      # Diagramma visuale dell'architettura N-Tier del sistema
 │   │   ├── classDiagram.png                               # Diagramma delle classi UML
 │   │   ├── erDiagram.png                                  # Diagramma Entità-Relazione (ERD) per il database
 │   │   ├── Gantt.JPG                                      # Pianificazione e cronoprogramma delle attività (Gantt)
 │   │   └── usecase.png                                    # Diagramma dei Casi d'Uso
 │   │
 │   ├── mermaid/                                           # File sorgente in codice Mermaid per la generazione dei diagrammi
+│   │   ├── architecture_overview.mmd                      # Codice Mermaid del diagramma architetturale a livelli
 │   │   ├── classDiagram.mmd                               # Codice Mermaid del diagramma delle classi
 │   │   ├── concept_map.mmd                                # Codice Mermaid della mappa concettuale
 │   │   ├── erDiagram.mmd                                  # Codice Mermaid del diagramma Entità-Relazione
@@ -26,8 +28,10 @@ faller-web-harvester/                                      # Root principale del
 │   │
 │   ├── Cross-Disciplinary Mapping (CDM).md                # Documento di mappatura interdisciplinare delle competenze
 │   ├── Executive Summary (ES).md                          # Sintesi esecutiva e obiettivi di alto livello del progetto
-│   ├── Project Structure (PS).md                          # Questo file: descrizione dell'albero delle directory
+│   ├── Project Postmortem (PP).md                         # Analisi critica dell'evoluzione del software e bilancio finale
+│   ├── Project Structure (PS).md                          # Descrizione dell'albero delle directory
 │   ├── Software Requirements Specification (SRS).md       # Specifica dei requisiti software (funzionali e non)
+│   ├── Test Suite.md                                      # Guida alla validazione e configurazione dei test unitari (Pytest)
 │   └── usecase.puml                                       # Sorgente PlantUML del diagramma dei Casi d'Uso
 │   
 ├── webapp/                                                # Core directory contenente il codice sorgente dell'applicazione Flask
