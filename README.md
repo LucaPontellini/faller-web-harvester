@@ -148,3 +148,8 @@ Non è destinato alla diffusione pubblica di contenuti protetti da copyright.
 È stato creato esclusivamente per uso personale e didattico.**
 
 Chi utilizza questo software deve farlo **in modo etico e responsabile**, rispettando le condizioni d’uso del sito Faller e le normative europee sul trattamento dei dati e sul web scraping.
+
+## Deploy
+
+Il progetto non prevede deploy online.  
+Non è stato effettuato il deploy perché si tratta di uno scraper che interagisce con un sito terzo ([Faller](https://www.faller.de/en/)) e non sarebbe appropriato né conforme alle condizioni d’uso pubblicarlo come servizio web.
